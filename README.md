@@ -1,4 +1,47 @@
-# Welcome to your Expo app 👋
+# Welcome to AstroMobileApp
+
+AstroMobileApp is a mobile application that fetches astronomy images of the day using [NASA's APOD API](https://api.nasa.gov/).
+
+This application is just a side project of mine as I wanted to gain more exposure to REACT Native, Expo, and using REST APIs.
+
+## Prerequisites
+
+- Node.js (v20.x or later, LTS recommended) This project was developed using Node.js v24.
+
+## Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Mac-Hawkins/AstroMobileApp.git
+   cd AstroMobileApp  # Navigate into the project directory
+   ```
+
+2. **Install dependencies**
+Run the following command to install all required packages:
+
+```npm install```
+
+3. **Get a NASA API Key**
+
+Sign up for a free API key from [NASA’s API portal](https://api.nasa.gov/).
+Once you receive your key, create a .env file in the root directory of the project.
+
+4. **Configure the .env file**
+
+Add your NASA API key to the .env file using the following format:
+
+```EXPO_PUBLIC_NASA_API_KEY=your_nasa_api_key_here```
+
+Refer to the .env.example file for guidance.
+
+5. **Start the app**
+Launch the app with:
+
+```npx expo start```
+
+This will start the Expo development server. Follow the prompts to run the app on your device or emulator. I personally used Expo Go.
+
+# Expo Information
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
