@@ -1,5 +1,6 @@
+import { Link } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Text, View } from "react-native";
+import { Dimensions, Image, Text, View } from "react-native";
 
 
 // useEffect is a hook that allows us to fetch data.
@@ -18,6 +19,10 @@ interface Apod {
 
 // Retrieve NASA_API_KEY from .env file.
 const API_KEY = process.env.EXPO_PUBLIC_NASA_API_KEY;
+
+// Get the screen dimenstions to use for styling the APOD image.
+const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
 
 // Entry point of application. This is the first screen that users see when they open the app.
 export default function Index() {
@@ -51,6 +56,12 @@ export default function Index() {
   }
 
   return (
+
+// Wrap the Link in a View with flex to keep the content center.
+<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+
+    {/* Links each image by unique date to its corresponding ApodExplanation page. */}
+    <Link key={apod?.date} href={{pathname: "/apod_explanation", params: {explanation: apod?.explanation}}}>
     <View
       style={{
         flex: 1,
@@ -64,10 +75,12 @@ export default function Index() {
       </Text>
 
       
-      {/* The APOD image itself */}
+      {/* The APOD image itself. resizeMode: "contain" ensures the image fits within the view without stretching or getting cut off. */}
       <Image 
-      style={{ width: 300, height: 300 }}
+      style={{ width: screenWidth * 0.9, height: screenHeight * 0.5, resizeMode: "contain" }}
       source={{ uri: apod?.url }}/>
+    </View>
+    </Link>
     </View>
   );
 }
