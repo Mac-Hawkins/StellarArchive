@@ -5,20 +5,25 @@ import { Stack } from "expo-router";
 export default function RootLayout() {
 
    // Stack of screens in the app.
-  return <Stack>
+  return <Stack
+  screenOptions={{
+      gestureEnabled: true // Enable swipe gestures
+  }}>
     {/* names need to match name of file. */}
     <Stack.Screen 
     name="index" 
     options={{ 
-      headerTitle: "Astronomy Picture of the Day" , 
+      headerTitle: "Astronomy Picture of the Day", 
       headerTitleAlign: "center", // This centers the title
-      headerStyle: { backgroundColor: "#acacc7" } 
+      headerStyle: { backgroundColor: "#acacc7" },
       }} />
 
     {/* headerBackButtonDisplayMode:minimal  */}
     <Stack.Screen name="apod_explanation" options={{ 
       headerTitle: "Explanation", 
-      headerBackButtonDisplayMode: "minimal" // Removes text next to back arrow.
+      headerTitleAlign: "center", // This centers the title
+      headerBackButtonDisplayMode: "minimal", // Removes text next to back arrow.
+      headerStyle: { backgroundColor: "#6679cc" } 
       }} />
   </Stack>;
 }

@@ -1,0 +1,11 @@
+TODO
+
+Features
+1. Make the explanation pop up from the bottom and only go 3/4 or so up.
+2. Allow screen to flip when phone is held landscape vs vertically.
+3. Allow retrieval of an image by selecting a date.
+4. Add loading text when waiting for an image to load.
+5. Only fetch the data once. Meaning if I swipe back to an image, I shouldn't have to re-fetch it using the API.
+
+Bugs
+1. Going to explanation screen and clicking the back arrow briefly causes the explanation title to align left.
