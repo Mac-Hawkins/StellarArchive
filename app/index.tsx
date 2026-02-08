@@ -1,8 +1,12 @@
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Dimensions, Image, Text, View } from "react-native";
-import { Directions, Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-
+import {
+  Directions,
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 
 // useEffect is a hook that allows us to fetch data.
 // useState is a hook that allows us to manage state in a state variable that we can then display.
@@ -17,24 +21,22 @@ interface Apod {
   url: string;
 }
 
-
 // Retrieve NASA_API_KEY from .env file.
 const API_KEY = process.env.EXPO_PUBLIC_NASA_API_KEY;
 
 // Get the screen dimenstions to use for styling the APOD image.
-const screenWidth = Dimensions.get('window').width;
-const screenHeight = Dimensions.get('window').height;
+const screenWidth = Dimensions.get("window").width;
+const screenHeight = Dimensions.get("window").height;
 
 // Entry point of application. This is the first screen that users see when they open the app.
 export default function Index() {
-
   // Router from expo-router to navigate between screens in the app via swiping.
   const router = useRouter();
 
   // apods being the APOD itself, and setApod being the function to update the state variable APOD.
   const [apod, setApod] = useState<Apod>(); // State variable to store the fetched APOD.
 
-  // Gets the data parameter from the passed in url from previous screen. 
+  // Gets the data parameter from the passed in url from previous screen.
   // This is used to fetch the APOD for a specific date when users swipe left or right to navigate between APODs.
   // TODO: Determine why date can be returned as an array and not just a string, and if this is a bug or expected behavior.
   const params = useLocalSearchParams();
@@ -43,20 +45,18 @@ export default function Index() {
     paramsDate = paramsDate[0];
   }
 
-  const date = (paramsDate as string) || new Date().toISOString().split('T')[0]; // Default to today;
+  const date = (paramsDate as string) || new Date().toISOString().split("T")[0]; // Default to today;
 
   // Define swipe gestures to navigate between APODs. Swipe left for previous day, swipe right for next day.
   const swipeLeft = Gesture.Fling()
     .direction(Directions.LEFT)
 
-    // Tells the gesture handler to execute the callback on the JavaScript thread instead of the UI thread. 
+    // Tells the gesture handler to execute the callback on the JavaScript thread instead of the UI thread.
     // This gives full access to the Date as the UI thread doesn't have a full implementation of it.
-    .runOnJS(true) 
+    .runOnJS(true)
     .onEnd(() => {
-
       // If no APOD is loaded, return early with loading text.
-      if (apod == null) 
-      {
+      if (apod == null) {
         console.log("APOD is null, cannot navigate to previous day.");
         return;
       }
@@ -66,21 +66,20 @@ export default function Index() {
       yesterday.setDate(yesterday.getDate() - 1);
 
       router.push({
-        pathname: '/',
-        params: { date: yesterday.toISOString().split('T')[0] },
+        pathname: "/",
+        params: { date: yesterday.toISOString().split("T")[0] },
       });
     });
 
-    const swipeRight = Gesture.Fling()
+  const swipeRight = Gesture.Fling()
     .direction(Directions.RIGHT)
 
-    // Tells the gesture handler to execute the callback on the JavaScript thread instead of the UI thread. 
+    // Tells the gesture handler to execute the callback on the JavaScript thread instead of the UI thread.
     // This gives full access to the Date as the UI thread doesn't have a full implementation of it.
     .runOnJS(true)
     .onEnd(() => {
       // If no APOD is loaded, return early with loading text.
-      if (apod == null) 
-      {
+      if (apod == null) {
         console.log("APOD is null, cannot navigate to next day.");
         return;
       }
@@ -90,8 +89,8 @@ export default function Index() {
       tomorrow.setDate(tomorrow.getDate() + 1);
 
       router.push({
-        pathname: '/',
-        params: { date: tomorrow.toISOString().split('T')[0] },
+        pathname: "/",
+        params: { date: tomorrow.toISOString().split("T")[0] },
       });
     });
 
@@ -106,61 +105,80 @@ export default function Index() {
 
   async function fetchApods() {
     try {
-      
-    // Get the APOD based on the date passed as a parameter in the URL. If no date is passed, default to today's APOD.
+      // Get the APOD based on the date passed as a parameter in the URL. If no date is passed, default to today's APOD.
       const response = await fetch(
-        `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${date}`
+        `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${date}`,
       );
 
       // Should retrieve the APOD in JSON.
-      const data = await response.json(); 
+      const data = await response.json();
 
       // Debug log for tesing purposes.
       console.log(data);
 
       // Update the state variable with the fetched APOD data.
-      setApod(data); 
-    }
-    catch (error) {
+      setApod(data);
+    } catch (error) {
       console.error("Error fetching data:", error);
     }
   }
 
   return (
-
-    
     // GestureDetector must be wrapped by GestureHandlerRootView.
     <GestureHandlerRootView>
-    
-    {/* // Wrap in GestureDetector to handle swipe gestures for navigation between APODs. */}
-    <GestureDetector gesture={gestures}>
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      {/* The title of the APOD image */}
-      <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 40, textAlign: "center" }}>
-        {apod?.title}
-      </Text>
+      {/* // Wrap in GestureDetector to handle swipe gestures for navigation between APODs. */}
+      <GestureDetector gesture={gestures}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {/* The title of the APOD image */}
+          <Text
+            style={{
+              fontSize: 24,
+              fontWeight: "bold",
+              marginBottom: 40,
+              textAlign: "center",
+            }}
+          >
+            {apod?.title}
+          </Text>
 
-      {/* Links each image by unique date to its corresponding ApodExplanation page. */}
-    <Link key={apod?.date} href={{pathname: "/apod_explanation", params: {explanation: apod?.explanation}}}>
+          {/* Links each image by unique date to its corresponding ApodExplanation page. */}
+          <Link
+            key={apod?.date}
+            href={{
+              pathname: "/apod_explanation",
+              params: { explanation: apod?.explanation },
+            }}
+          >
+            {/* The APOD image itself. resizeMode: "contain" ensures the image fits within the view without stretching or getting cut off. */}
+            <Image
+              style={{
+                width: screenWidth * 0.9,
+                height: screenHeight * 0.5,
+                resizeMode: "contain",
+              }}
+              source={{ uri: apod?.url }}
+            />
+          </Link>
 
-      {/* The APOD image itself. resizeMode: "contain" ensures the image fits within the view without stretching or getting cut off. */}
-      <Image 
-      style={{ width: screenWidth * 0.9, height: screenHeight * 0.5, resizeMode: "contain" }}
-      source={{ uri: apod?.url }}/>
-    </Link>
-
-      {/* The date of the APOD image */}
-      <Text style={{ fontSize: 24, fontWeight: "bold", marginTop: 80, textAlign: "center" }}>
-        {apod?.date}
-      </Text>
-    </View>
-    </GestureDetector>
+          {/* The date of the APOD image */}
+          <Text
+            style={{
+              fontSize: 24,
+              fontWeight: "bold",
+              marginTop: 80,
+              textAlign: "center",
+            }}
+          >
+            {apod?.date}
+          </Text>
+        </View>
+      </GestureDetector>
     </GestureHandlerRootView>
   );
 }

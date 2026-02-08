@@ -9,3 +9,4 @@ Features
 
 Bugs
 1. Going to explanation screen and clicking the back arrow briefly causes the explanation title to align left.
+2. Back arrow is on APOD screen. Don't think it should be.
