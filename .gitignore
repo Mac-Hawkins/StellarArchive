@@ -36,6 +36,8 @@ yarn-error.*
 # env files
 .env
 
+*.patch
+
 # log files
 *.log
 
