@@ -6,8 +6,9 @@ Features
 3. Allow retrieval of an image by selecting a date.
 4. Add loading text when waiting for an image to load.
 5. Only fetch the data once. Meaning if I swipe back to an image, I shouldn't have to re-fetch it using the API.
+6. Cleanup index.tsx.
 
-Bugs
-1. Going to explanation screen and clicking the back arrow briefly causes the explanation title to align left.
-2. Back arrow is on APOD screen. Don't think it should be.
-3. There seems to be more API queries than necessary on startup. Not sure why. Need to look into.
+Bug:
+1. There seems to be more API queries than necessary on startup. Not sure why. Need to look into.
+2. Bringing up the Explanation screen might be a bit buggy still. Can't tell.
+

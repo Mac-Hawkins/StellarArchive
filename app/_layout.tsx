@@ -16,6 +16,7 @@ export default function RootLayout() {
         options={{
           headerTitle: "Astronomy Picture of the Day",
           headerTitleAlign: "center", // This centers the title
+          headerBackVisible: false, // Hides the back button on the index screen
           headerStyle: { backgroundColor: "#acacc7" },
         }}
       />
@@ -24,12 +25,11 @@ export default function RootLayout() {
         name="apod_explanation"
         options={{
           title: "Explanation",
-          headerShown: true, // Explicitly show the header
+          headerShown: false, // Hide native header to use a custom one (gorhom bottom-sheet).
           headerTitleAlign: "center", // This centers the title
-          headerBackButtonDisplayMode: "minimal", // Removes text next to back arrow.
+          headerBackButtonDisplayMode: "minimal", // Removes back arrow.
           headerStyle: { backgroundColor: "#6679cc" },
-          presentation: "formSheet", // This makes the screen appear as a modal, sliding up from the bottom.
-          sheetAllowedDetents: [0.8], // This makes the fomrSheet take up 80% of the screen height.
+          presentation: "transparentModal", // This makes the screen appear as a modal, sliding up from the bottom.
         }}
       />
     </Stack>
