@@ -20,14 +20,16 @@ export default function RootLayout() {
         }}
       />
 
-      {/* headerBackButtonDisplayMode:minimal  */}
       <Stack.Screen
         name="apod_explanation"
         options={{
-          headerTitle: "Explanation",
+          title: "Explanation",
+          headerShown: true, // Explicitly show the header
           headerTitleAlign: "center", // This centers the title
           headerBackButtonDisplayMode: "minimal", // Removes text next to back arrow.
           headerStyle: { backgroundColor: "#6679cc" },
+          presentation: "formSheet", // This makes the screen appear as a modal, sliding up from the bottom.
+          sheetAllowedDetents: [0.8], // This makes the fomrSheet take up 80% of the screen height.
         }}
       />
     </Stack>

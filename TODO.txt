@@ -10,3 +10,4 @@ Features
 Bugs
 1. Going to explanation screen and clicking the back arrow briefly causes the explanation title to align left.
 2. Back arrow is on APOD screen. Don't think it should be.
+3. There seems to be more API queries than necessary on startup. Not sure why. Need to look into.
