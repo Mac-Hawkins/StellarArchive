@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Dimensions, Image, Text, View } from "react-native";
 import {
@@ -46,6 +46,7 @@ export default function Index() {
   }
 
   const date = (paramsDate as string) || new Date().toISOString().split("T")[0]; // Default to today;
+  console.log("Date parameter from URL:", date); // Debug log to verify the date parameter is being retrieved correctly from the URL.
 
   // Define swipe gestures to navigate between APODs. Swipe left for previous day, swipe right for next day.
   const swipeLeft = Gesture.Fling()
@@ -62,12 +63,12 @@ export default function Index() {
       }
 
       // Compute the date for the previous day by subtracting one day from the current date. This allows users to swipe left to see the previous day's APOD.
-      const yesterday = new Date(date);
-      yesterday.setDate(yesterday.getDate() - 1);
+      const prevDay = new Date(date);
+      prevDay.setDate(prevDay.getDate() - 1);
 
       router.push({
         pathname: "/",
-        params: { date: yesterday.toISOString().split("T")[0] },
+        params: { date: prevDay.toISOString().split("T")[0] },
       });
     });
 
@@ -85,17 +86,49 @@ export default function Index() {
       }
 
       // Compute the date for the next day by adding one day to the current date. This allows users to swipe right to see the next day's APOD.
-      const tomorrow = new Date(date);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Needed to normalize today's date to midnight for accurate comparison
+
+      // Prevent users from swiping right to navigate to future APODs that haven't been released yet.
+      // If the current APOD is today's date, return early and don't navigate to the next day.
+      if (nextDay >= today) {
+        console.log("Cannot navigate to future APODs.");
+        return;
+      }
 
       router.push({
         pathname: "/",
-        params: { date: tomorrow.toISOString().split("T")[0] },
+        params: { date: nextDay.toISOString().split("T")[0] },
+      });
+    });
+
+  const swipeUp = Gesture.Fling()
+    .direction(Directions.UP)
+    // Tells the gesture handler to execute the callback on the JavaScript thread instead of the UI thread.
+    // This gives full access to the Date as the UI thread doesn't have a full implementation of it.
+    .runOnJS(true)
+    .onEnd(() => {
+      // If no APOD is loaded, return early with loading text.
+      if (apod == null) {
+        console.log("APOD is null, cannot navigate to previous day.");
+        return;
+      }
+
+      // Compute the date for the previous day by subtracting one day from the current date. This allows users to swipe left to see the previous day's APOD.
+      const prevDay = new Date(date);
+      prevDay.setDate(prevDay.getDate() - 1);
+
+      router.push({
+        pathname: "/apod_explanation",
+        params: { explanation: apod?.explanation },
       });
     });
 
   // Combine gestures
-  const gestures = Gesture.Simultaneous(swipeLeft, swipeRight);
+  const gestures = Gesture.Simultaneous(swipeLeft, swipeRight, swipeUp);
 
   // Hooks from react to fetch data.
   useEffect(() => {
@@ -147,24 +180,15 @@ export default function Index() {
             {apod?.title}
           </Text>
 
-          {/* Links each image by unique date to its corresponding ApodExplanation page. */}
-          <Link
-            key={apod?.date}
-            href={{
-              pathname: "/apod_explanation",
-              params: { explanation: apod?.explanation },
+          {/* The APOD image itself. resizeMode: "contain" ensures the image fits within the view without stretching or getting cut off. */}
+          <Image
+            style={{
+              width: screenWidth * 0.9,
+              height: screenHeight * 0.5,
+              resizeMode: "contain",
             }}
-          >
-            {/* The APOD image itself. resizeMode: "contain" ensures the image fits within the view without stretching or getting cut off. */}
-            <Image
-              style={{
-                width: screenWidth * 0.9,
-                height: screenHeight * 0.5,
-                resizeMode: "contain",
-              }}
-              source={{ uri: apod?.url }}
-            />
-          </Link>
+            source={{ uri: apod?.url }}
+          />
 
           {/* The date of the APOD image */}
           <Text
