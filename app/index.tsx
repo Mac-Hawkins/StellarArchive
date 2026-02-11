@@ -1,12 +1,15 @@
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dimensions, Image, Text, View } from "react-native";
+
 import {
   Directions,
   Gesture,
   GestureDetector,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
+import { useApodStore } from "./store/ApodStore.js";
 
 // useEffect is a hook that allows us to fetch data.
 // useState is a hook that allows us to manage state in a state variable that we can then display.
@@ -36,10 +39,14 @@ export default function Index() {
   // apods being the APOD itself, and setApod being the function to update the state variable APOD.
   const [apod, setApod] = useState<Apod>(); // State variable to store the fetched APOD.
 
+  const closeSheet = useApodStore((state) => state.closeSheet);
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
   // Gets the data parameter from the passed in url from previous screen.
   // This is used to fetch the APOD for a specific date when users swipe left or right to navigate between APODs.
   // TODO: Determine why date can be returned as an array and not just a string, and if this is a bug or expected behavior.
   const params = useLocalSearchParams();
+
   let paramsDate = params?.date;
   if (Array.isArray(paramsDate)) {
     paramsDate = paramsDate[0];
@@ -66,6 +73,8 @@ export default function Index() {
       const prevDay = new Date(date);
       prevDay.setDate(prevDay.getDate() - 1);
 
+      // Navigate to the index screen with the date parameter set to the previous day.
+      // This will trigger a re-render and fetch the APOD for the previous day.
       router.push({
         pathname: "/",
         params: { date: prevDay.toISOString().split("T")[0] },
@@ -99,6 +108,8 @@ export default function Index() {
         return;
       }
 
+      // Navigate to the next day's APOD by pushing a new URL with the next day's date as a parameter.
+      // This will trigger a re-render and fetch the APOD for the next day.
       router.push({
         pathname: "/",
         params: { date: nextDay.toISOString().split("T")[0] },
@@ -111,30 +122,34 @@ export default function Index() {
     // This gives full access to the Date as the UI thread doesn't have a full implementation of it.
     .runOnJS(true)
     .onEnd(() => {
-      // If no APOD is loaded, return early with loading text.
-      if (apod == null) {
-        console.log("APOD is null, cannot navigate to previous day.");
-        return;
-      }
+      // Set the state of useApodStore to open. This will allow us to open the bottom sheet, even if it was closed previously.
+      useApodStore.getState().openSheet();
 
-      // Compute the date for the previous day by subtracting one day from the current date. This allows users to swipe left to see the previous day's APOD.
-      const prevDay = new Date(date);
-      prevDay.setDate(prevDay.getDate() - 1);
-
-      router.push({
-        pathname: "/apod_explanation",
-        params: { explanation: apod?.explanation },
-      });
+      console.log("Swiped up to open bottom sheet with explanation.");
     });
 
   // Combine gestures
   const gestures = Gesture.Simultaneous(swipeLeft, swipeRight, swipeUp);
 
-  // Hooks from react to fetch data.
+  // Get the isSheetOpen state from ApodStore to determine whether the bottom sheet should be open or closed.
+  const isSheetOpen = useApodStore((state) => state.isSheetOpen);
+
+  // useEffect that runs everytime isSheetOpen changes.
+  useEffect(() => {
+    // When the isSheetOpen state changes, either expand or close the bottom sheet based on the new state.
+    // This ensures that the bottom sheet's visibility is in sync with the state in ApodStore.
+    if (isSheetOpen) {
+      bottomSheetRef.current?.expand();
+    } else {
+      bottomSheetRef.current?.close();
+    }
+  }, [isSheetOpen]); // Re-run the effect when the date or sheet state changes (i.e., when user swipes to a different day).
+
+  // useEffect that runs everytime date changes.
   useEffect(() => {
     // Fetch astronomy images from NASA API when the component mounts.
     fetchApods();
-  }, [date]); // Re-run the effect when the date changes (i.e., when user swipes to a different day).
+  }, [date]); // ONLY runs when the date changes
 
   async function fetchApods() {
     try {
@@ -203,6 +218,43 @@ export default function Index() {
           </Text>
         </View>
       </GestureDetector>
+      {/* Used a BottomSheet to make it a little more obvious that it can be dragged and swiped away. */}
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={-1}
+        enablePanDownToClose={true} // Allows swiping away the bottom sheet by swiping down.
+        snapPoints={["25%", "80%"]}
+        onClose={closeSheet} // When the bottom sheet is closed, call the closeSheet function to update the state in ApodStore.
+      >
+        {/* Used a BottomSheetScrollView so I could have a title */}
+        <BottomSheetScrollView>
+          {/* Header */}
+          <View>
+            <Text
+              style={{
+                backgroundColor: "#1a181820",
+                borderRadius: 20,
+                fontSize: 24,
+                margin: 20,
+                textAlign: "center",
+                fontWeight: "bold",
+              }}
+            >
+              Explanation
+            </Text>
+
+            {/* Display the explanation of the APOD, which is passed as a parameter. */}
+            <Text
+              style={{
+                fontSize: 18,
+                margin: 20,
+              }}
+            >
+              {apod?.explanation}
+            </Text>
+          </View>
+        </BottomSheetScrollView>
+      </BottomSheet>
     </GestureHandlerRootView>
   );
 }
