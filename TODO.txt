@@ -1,9 +1,8 @@
 TODO
 
 Features
-1. Make the explanation pop up from the bottom and only go 3/4 or so up.
-2. Allow screen to flip when phone is held landscape vs vertically.
-3. Allow retrieval of an image by selecting a date.
-4. Add loading text when waiting for an image to load.
-5. Cleanup index.tsx.
+1. Allow screen to flip when phone is held landscape vs vertically.
+2. Allow retrieval of an image by selecting a date.
+3. Add loading text when waiting for an image to load.
+4. Cleanup index.tsx.
 
