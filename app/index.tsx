@@ -83,7 +83,7 @@ export default function Index() {
 
       // Navigate to the index screen with the date parameter set to the previous day.
       // This will trigger a re-render and fetch the APOD for the previous day.
-      router.push({
+      router.replace({
         pathname: "/",
         params: { date: prevDay.toISOString().split("T")[0] },
       });
@@ -118,7 +118,7 @@ export default function Index() {
 
       // Navigate to the next day's APOD by pushing a new URL with the next day's date as a parameter.
       // This will trigger a re-render and fetch the APOD for the next day.
-      router.push({
+      router.replace({
         pathname: "/",
         params: { date: nextDay.toISOString().split("T")[0] },
       });
@@ -155,16 +155,24 @@ export default function Index() {
     // When the isSheetOpen state changes, either expand or close the bottom sheet based on the new state.
     // This ensures that the bottom sheet's visibility is in sync with the state in ApodStore.
     if (isSheetOpen) {
+      console.log("Opening bottom sheet.");
       bottomSheetRef.current?.expand();
     } else {
       bottomSheetRef.current?.close();
     }
-  }, [isSheetOpen]); // Re-run the effect when the date or sheet state changes (i.e., when user swipes to a different day).
+  }, [isSheetOpen, isFocused]); // Re-run the effect when the date or sheet state changes (i.e., when user swipes to a different day).
 
+  const pastQueries = useApodStore((state) => state.pastQueries);
   // useEffect that runs everytime date changes.
   useEffect(() => {
-    // Fetch astronomy images from NASA API when the component mounts.
-    fetchApods();
+    if (pastQueries[date]) {
+      console.log("APOD for this date found in cache, using cached data.");
+      setApod(pastQueries[date]);
+      return;
+    } else {
+      // Use API to fetch astronomy images from NASA API when the component mounts.
+      fetchApods();
+    }
   }, [date]); // Only runs when the date changes
 
   async function fetchApods() {
@@ -182,6 +190,9 @@ export default function Index() {
 
       // Update the state variable with the fetched APOD data.
       setApod(data);
+
+      // Cache the fetched APOD in the pastQueries dictionary with the date as the key.
+      pastQueries[date] = data;
     } catch (error) {
       console.error("Error fetching data:", error);
     }
