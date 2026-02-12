@@ -10,3 +10,6 @@ Features
 8. Allow users to record favorite APODs.
 9. Shrink the date, APOD, and APOD title when the explanation is brought up.
 
+Bugs
+1. There are some APODs that are not images. They have no url and have a "media_type" attribute of "other". 
+    I should skip those and go to the next one if possible.

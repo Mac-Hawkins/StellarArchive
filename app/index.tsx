@@ -74,6 +74,7 @@ export default function Index() {
 
   console.log("Date parameter from URL:", date); // Debug log to verify the date parameter is being retrieved correctly from the URL.
 
+  // General method for showing a toast message at the bottom of the screen.
   const showToast = (message: string) => {
     Toast.show({
       type: "info",
@@ -82,6 +83,7 @@ export default function Index() {
     });
   };
 
+  // Function to navigate to the previous day's APOD when the user swipes left.
   const navigateToPrevDay = () => {
     // If no APOD is loaded, return early with loading text.
     if (apod == null) {
@@ -105,6 +107,7 @@ export default function Index() {
     return true;
   };
 
+  // Function to navigate to the next day's APOD when the user swipes right.
   const navigateToNextDay = () => {
     // If no APOD is loaded, return early with loading text.
     if (apod == null) {
@@ -169,7 +172,7 @@ export default function Index() {
           translateX.value,
         );
         // We didn't reach the threshold so snap back to normal position.
-        translateX.value = 0;
+        translateX.value = withSpring(0);
       }
     });
 
@@ -237,6 +240,30 @@ export default function Index() {
       fetchApods();
     }
   }, [date]); // Only runs when the date changes
+
+  // Use effect for moving the screen left and right a little bit to indicate that user's can swipe to a new APOD.
+  useEffect(() => {
+    // Don't bother running the animation if we have already been here.
+    if (pastQueries[date]) {
+      console.log("APOD for this date found in cache, using cached data.");
+      return;
+    } else {
+      // Wait a tiny bit after mount so the user sees the photo first
+      const timeout = setTimeout(() => {
+        // withSpring needs to be nested in each other as they are async and therefore non-blocking.
+        // 1. Peek Left
+        translateX.value = withSpring(-40, {}, () => {
+          // 2. Peek Right
+          translateX.value = withSpring(40, {}, () => {
+            // 3. Snap back to Center
+            translateX.value = withSpring(0);
+          });
+        });
+      }, 2000); // Wait a bit after the APOD loads to start the peek animation
+
+      return () => clearTimeout(timeout);
+    }
+  }, [date]); // Re-runs briefly every time a new APOD loads
 
   async function fetchApods() {
     try {
