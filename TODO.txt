@@ -5,10 +5,5 @@ Features
 2. Allow screen to flip when phone is held landscape vs vertically.
 3. Allow retrieval of an image by selecting a date.
 4. Add loading text when waiting for an image to load.
-5. Only fetch the data once. Meaning if I swipe back to an image, I shouldn't have to re-fetch it using the API.
-6. Cleanup index.tsx.
-
-Bug:
-1. There seems to be more API queries than necessary on startup. Not sure why. Need to look into.
-2. Bringing up the Explanation screen might be a bit buggy still. Can't tell.
+5. Cleanup index.tsx.
 
