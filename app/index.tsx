@@ -1,4 +1,5 @@
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Dimensions, Image, Text, View } from "react-native";
@@ -52,7 +53,14 @@ export default function Index() {
     paramsDate = paramsDate[0];
   }
 
-  const date = (paramsDate as string) || new Date().toISOString().split("T")[0]; // Default to today;
+  // Gets the date param if available. If not, then set to current date (account for offset as that can cause a bug by showing the next day).
+  let date = paramsDate as string;
+  let tempDate = new Date();
+  if (date === undefined) {
+    tempDate.setHours(0, 0, 0, 0);
+    date = tempDate.toISOString().split("T")[0];
+  }
+
   console.log("Date parameter from URL:", date); // Debug log to verify the date parameter is being retrieved correctly from the URL.
 
   // Define swipe gestures to navigate between APODs. Swipe left for previous day, swipe right for next day.
@@ -131,11 +139,19 @@ export default function Index() {
   // Combine gestures
   const gestures = Gesture.Simultaneous(swipeLeft, swipeRight, swipeUp);
 
+  // Returns true if this is the top screen in the stack, false if it's buried under another screen.
+  // This is important to determine whether we should open or close the bottom sheet when the isSheetOpen state changes,
+  // as we only want to move the sheet if this screen is currently focused.
+  const isFocused = useIsFocused();
+
   // Get the isSheetOpen state from ApodStore to determine whether the bottom sheet should be open or closed.
   const isSheetOpen = useApodStore((state) => state.isSheetOpen);
 
   // useEffect that runs everytime isSheetOpen changes.
   useEffect(() => {
+    // Only run the following if this screen is currently focused.
+    if (!isFocused) return;
+
     // When the isSheetOpen state changes, either expand or close the bottom sheet based on the new state.
     // This ensures that the bottom sheet's visibility is in sync with the state in ApodStore.
     if (isSheetOpen) {
@@ -149,7 +165,7 @@ export default function Index() {
   useEffect(() => {
     // Fetch astronomy images from NASA API when the component mounts.
     fetchApods();
-  }, [date]); // ONLY runs when the date changes
+  }, [date]); // Only runs when the date changes
 
   async function fetchApods() {
     try {
