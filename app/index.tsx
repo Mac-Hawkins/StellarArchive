@@ -1,7 +1,6 @@
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useIsFocused } from "@react-navigation/native";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   Button,
@@ -50,9 +49,6 @@ const screenHeight = Dimensions.get("window").height;
 
 // Entry point of application. This is the first screen that users see when they open the app.
 export default function Index() {
-  // Router from expo-router to navigate between screens in the app via swiping.
-  const router = useRouter();
-
   // apods being the APOD itself, and setApod being the function to update the state variable APOD.
   const [apod, setApod] = useState<Apod>(); // State variable to store the fetched APOD.
   const [showPicker, setShowPicker] = useState(false); // State variable to control whether the date picker is visible or not.
@@ -62,35 +58,20 @@ export default function Index() {
   const closeSheet = useApodStore((state) => state.closeSheet);
   const bottomSheetRef = useRef<BottomSheet>(null);
 
+  // Create hooks to swipe direction and current date in stored apod data.
+  // Have to use this instead of getState() as that would just do a snapshot in time,
+  // and the app wouldn't know to runt he use state logic if the var changed.
+  let swipeDirection = useApodStore((state) => state.swipeDirection); // getter
+  let date = useApodStore((state) => state.currentDate); // getter
+  const pastQueries = useApodStore((state) => state.pastQueries);
+  const setDate = useApodStore((state) => state.setApodDate); // setter
+
+  console.log("Date parameter from URL:", date); // Debug log to verify the date parameter is being retrieved correctly from the URL.
+
   // useSharedValue to track the horizontal translation of the swipe gesture.
   // This is used to determine how far the user has swiped left or right,
   // which can be used to trigger navigation between APODs when a certain threshold is reached.
   const translateX = useSharedValue(0);
-
-  // Gets the data parameter from the passed in url from previous screen.
-  // This is used to fetch the APOD for a specific date when users swipe left or right to navigate between APODs.
-  // TODO: Determine why date can be returned as an array and not just a string, and if this is a bug or expected behavior.
-  const params = useLocalSearchParams();
-
-  let paramsDirection = params?.direction;
-  if (Array.isArray(paramsDirection)) {
-    paramsDirection = paramsDirection[0];
-  }
-
-  let paramsDate = params?.date;
-  if (Array.isArray(paramsDate)) {
-    paramsDate = paramsDate[0];
-  }
-
-  // Gets the date param if available. If not, then set to current date (account for offset as that can cause a bug by showing the next day).
-  let date = paramsDate as string;
-  let tempDate = new Date();
-  if (date === undefined) {
-    tempDate.setHours(0, 0, 0, 0);
-    date = tempDate.toISOString().split("T")[0];
-  }
-
-  console.log("Date parameter from URL:", date); // Debug log to verify the date parameter is being retrieved correctly from the URL.
 
   // General method for showing a toast message at the bottom of the screen.
   const showToast = (message: string) => {
@@ -112,7 +93,7 @@ export default function Index() {
     return () => StatusBar.setHidden(false);
   }, [isFullScreen]);
 
-  // This function runs when a date is selected frmo the date picker element.
+  // This function runs when a date is selected from the date picker element.
   const onDateSelected = (event: any, selectedDate: Date | undefined): void => {
     // 1. Hide the picker (important for Android)
     setShowPicker(false);
@@ -124,8 +105,8 @@ export default function Index() {
       selectedDate.setHours(0, 0, 0, 0); // Normalize the selected date to midnight to avoid timezone issues.
       let selectedDateStr: string = selectedDate.toISOString().split("T")[0];
 
-      // Run your program here (e.g., fetch APOD for the selected date)
-      fetchAPODForDate(selectedDateStr);
+      // Update the current date and swipe direction in ApodStore so that the next screen can fetch the correct APOD based on the date and direction.
+      setDate(selectedDateStr, "prev");
     }
   };
 
@@ -141,14 +122,10 @@ export default function Index() {
     const prevDay = new Date(date);
     prevDay.setDate(prevDay.getDate() - 1);
 
-    translateX.value = withSpring(-screenWidth); // Slide off screen to left (entire screen width).
+    // Update the current date and swipe direction in ApodStore so that the next screen can fetch the correct APOD based on the date and direction.
+    setDate(prevDay.toISOString().split("T")[0], "prev");
 
-    // Navigate to the index screen with the date parameter set to the previous day.
-    // This will trigger a re-render and fetch the APOD for the previous day.
-    router.replace({
-      pathname: "/",
-      params: { date: prevDay.toISOString().split("T")[0], direction: "prev" },
-    });
+    translateX.value = withSpring(-screenWidth); // Slide off screen to left (entire screen width).
 
     return true;
   };
@@ -171,32 +148,27 @@ export default function Index() {
     // Prevent users from swiping right to navigate to future APODs that haven't been released yet.
     // If the current APOD is today's date, return early and don't navigate to the next day.
     if (nextDay >= today) {
-      console.log("Cannot navigate to future APODs.");
       showToast("No APODs from the future!"); // Show a toast message to inform the user that they can't navigate to future APODs.
       return false;
     }
 
     translateX.value = withSpring(screenWidth); // Slide off screen to right (entire screen width).
 
-    // Navigate to the next day's APOD by pushing a new URL with the next day's date as a parameter.
-    // This will trigger a re-render and fetch the APOD for the next day.
-    router.replace({
-      pathname: "/",
-      params: { date: nextDay.toISOString().split("T")[0], direction: "next" },
-    });
+    // Update the current date and swipe direction in ApodStore so that the next screen can fetch the correct APOD based on the date and direction.
+    setDate(nextDay.toISOString().split("T")[0], "next");
 
     return true;
   };
 
   const panHorizontal = Gesture.Pan()
-    .activeOffsetX([-50, 50]) // Start the gesture after a horizontal movement of 50 pixels to avoid conflicts with vertical gestures.
+    .activeOffsetX([-20, 20]) // Start the gesture after a horizontal movement of 50 pixels to avoid conflicts with vertical gestures.
     .onUpdate((event) => {
       translateX.value = event.translationX; // Update the shared value with the current horizontal translation of the gesture.
     })
     .runOnJS(true)
     .onEnd(() => {
       let wasNavigated = false; // Flag to track if navigation occurred
-      const threshold = screenWidth * 0.4; // Swipe 40% of screen to trigger navigation.
+      const threshold = screenWidth * 0.3; // Swipe 30% of screen to trigger navigation.
       // translateX increases when swiping right and decreases when swiping left,
       // so we check if it's greater than the positive threshold for right swipe
       // and less than the negative threshold for left swipe.
@@ -274,12 +246,22 @@ export default function Index() {
     }
   }, [isSheetOpen, isFocused]); // Re-run the effect when the date or sheet state changes (i.e., when user swipes to a different day).
 
-  const pastQueries = useApodStore((state) => state.pastQueries);
   // useEffect that runs everytime date changes.
   useEffect(() => {
+    if (date === "") {
+      let tempDate = new Date();
+      tempDate.setHours(0, 0, 0, 0);
+      date = tempDate.toISOString().split("T")[0];
+      console.log("Date was empty, set to current date:", date);
+      //return; // The store update will trigger this useEffect to run again with the correct date.
+    }
+
     if (pastQueries[date]) {
       console.log("APOD for this date found in cache, using cached data.");
+      translateX.value = swipeDirection === "next" ? -screenWidth : screenWidth;
       setApod(pastQueries[date]);
+      translateX.value = withSpring(0);
+
       return;
     } else {
       // Use API to fetch astronomy images from NASA API when the component mounts.
@@ -308,62 +290,6 @@ export default function Index() {
     }
   }, [date]); // Re-runs briefly every time a new APOD loads
 
-  async function fetchAPODForDate(datePicked: string) {
-    try {
-      console.log("Fetching APOD for date:", datePicked); // Debug log to verify the correct date is being used for fetching.
-      // Get the APOD based on the date passed as a parameter in the URL. If no date is passed, default to today's APOD.
-      const response = await fetch(
-        `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${datePicked}`,
-      );
-
-      // Should retrieve the APOD in JSON.
-      let data = await response.json();
-
-      // Make a loop to skiip any APODs that aren't images (e.g., videos) and fetch the next one until we find an
-      // image or reach a maximum number of tries to avoid infinite loops in case of unexpected API behavior.
-      let maxTries = 5;
-      let i = 0;
-      while (data.media_type !== "image" && i < maxTries) {
-        console.log("Media type is not an image, skipping ahead.");
-
-        if (paramsDirection === "prev") {
-          // If the user was navigating to the previous day, keep going back one day until we find an image.
-          const prevDay = new Date(datePicked);
-          prevDay.setDate(prevDay.getDate() - 1);
-          datePicked = prevDay.toISOString().split("T")[0];
-        } else if (paramsDirection === "next") {
-          // If the user was navigating to the next day, keep going forward one day until we find an image.
-          const nextDay = new Date(date);
-          nextDay.setDate(nextDay.getDate() + 1);
-          datePicked = nextDay.toISOString().split("T")[0];
-        }
-
-        // Fetch the APOD with the new date.
-        const nextResponse = await fetch(
-          `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${datePicked}`,
-        );
-        data = await nextResponse.json();
-        i++;
-      }
-
-      // Debug log for tesing purposes.
-      console.log(data);
-
-      // Update the state variable with the fetched APOD data.
-      setApod(data);
-
-      // Cache the fetched APOD in the pastQueries dictionary with the date as the key.
-      pastQueries[datePicked] = data;
-
-      router.replace({
-        pathname: "/",
-        params: { date: datePicked, direction: "next" },
-      });
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  }
-
   async function fetchApods() {
     try {
       // Get the APOD based on the date passed as a parameter in the URL. If no date is passed, default to today's APOD.
@@ -373,7 +299,6 @@ export default function Index() {
 
       // Should retrieve the APOD in JSON.
       let data = await response.json();
-      console.log("direction from params is ", paramsDirection);
 
       // Make a loop to skiip any APODs that aren't images (e.g., videos) and fetch the next one until we find an
       // image or reach a maximum number of tries to avoid infinite loops in case of unexpected API behavior.
@@ -382,14 +307,12 @@ export default function Index() {
       while (data.media_type !== "image" && i < maxTries) {
         console.log("Media type is not an image, skipping ahead.");
 
-        console.log("direction from params is ", paramsDirection);
-
-        if (paramsDirection === "prev") {
+        if (swipeDirection === "prev") {
           // If the user was navigating to the previous day, keep going back one day until we find an image.
           const prevDay = new Date(date);
           prevDay.setDate(prevDay.getDate() - 1);
           date = prevDay.toISOString().split("T")[0];
-        } else if (paramsDirection === "next") {
+        } else if (swipeDirection === "next") {
           // If the user was navigating to the next day, keep going forward one day until we find an image.
           const nextDay = new Date(date);
           nextDay.setDate(nextDay.getDate() + 1);
@@ -405,13 +328,27 @@ export default function Index() {
       }
 
       // Debug log for tesing purposes.
-      console.log(data);
+      console.log("fetchApods", data);
 
+      // 1. Instantly move the card to the OTHER side (invisible)
+      // If they swiped Right, we want the new card to slide in from the Left
+      translateX.value = swipeDirection === "next" ? -screenWidth : screenWidth;
+
+      // 2. Set the new image data
       // Update the state variable with the fetched APOD data.
       setApod(data);
 
+      // 3. Smoothly slide the new card into the center
+      translateX.value = withSpring(0);
+
       // Cache the fetched APOD in the pastQueries dictionary with the date as the key.
       pastQueries[date] = data;
+      console.log(
+        "About to update store apod date and swipe:",
+        date,
+        swipeDirection,
+      );
+      setDate(date, swipeDirection); // Update the current date and swipe direction in ApodStore so that the next screen can fetch the correct APOD based on the date and direction.
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -444,7 +381,7 @@ export default function Index() {
               alignItems: "center",
             }}
           >
-            <View style={{ alignItems: "center", paddingTop: 20 }}>
+            <View style={{ alignItems: "center", paddingTop: 30 }}>
               {/* The title of the APOD image */}
               <Text
                 style={{

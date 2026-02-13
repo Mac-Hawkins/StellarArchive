@@ -4,6 +4,7 @@ AstroMobileApp is a mobile application that fetches astronomy images of the day 
 
 This application is just a side project of mine as I wanted to gain more exposure to REACT Native, Expo, and using REST APIs.
 
+APOD Demo
 [![AstroMobileApp Demo](https://img.youtube.com/vi/3zu7TlUqJJA/0.jpg)](https://youtu.be/3zu7TlUqJJA)
 
 ## Prerequisites
