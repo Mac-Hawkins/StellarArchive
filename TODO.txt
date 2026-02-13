@@ -2,14 +2,13 @@ TODO
 
 Features
 1. Allow screen to flip when phone is held landscape vs vertically.
-2. Allow retrieval of an image by selecting a date.
-3. Add loading text when waiting for an image to load.
-4. Cleanup index.tsx.
-6. Add some sort of indication that users can swipe left, right, and up. Arrows maybe?
-7. Add a backend to allow user's to create accounts.
-8. Allow users to record favorite APODs.
-9. Shrink the date, APOD, and APOD title when the explanation is brought up.
+2. Add loading text when waiting for an image to load.
+3. Cleanup index.tsx.
+4. Add some sort of indication that users up. Arrows maybe?
+5. Add a backend to allow user's to create accounts.
+6. Allow users to record favorite APODs.
+7. Shrink the date, APOD, and APOD title when the explanation is brought up.
+8. Make the select date buttons static in same section as title so it doesn't get moved when swiped.
+9. Make the date picker start from the current date you are viewing.
 
 Bugs
-1. There are some APODs that are not images. They have no url and have a "media_type" attribute of "other". 
-    I should skip those and go to the next one if possible.
