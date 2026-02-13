@@ -1,8 +1,9 @@
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Dimensions, Image, Text, View } from "react-native";
+import { Button, Dimensions, Image, Text, View } from "react-native";
 import {
   Directions,
   Gesture,
@@ -45,6 +46,8 @@ export default function Index() {
 
   // apods being the APOD itself, and setApod being the function to update the state variable APOD.
   const [apod, setApod] = useState<Apod>(); // State variable to store the fetched APOD.
+  const [showPicker, setShowPicker] = useState(false);
+  const [datePicked, setDatePicked] = useState(new Date());
 
   const closeSheet = useApodStore((state) => state.closeSheet);
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -58,6 +61,11 @@ export default function Index() {
   // This is used to fetch the APOD for a specific date when users swipe left or right to navigate between APODs.
   // TODO: Determine why date can be returned as an array and not just a string, and if this is a bug or expected behavior.
   const params = useLocalSearchParams();
+
+  let paramsDirection = params?.direction;
+  if (Array.isArray(paramsDirection)) {
+    paramsDirection = paramsDirection[0];
+  }
 
   let paramsDate = params?.date;
   if (Array.isArray(paramsDate)) {
@@ -83,6 +91,28 @@ export default function Index() {
     });
   };
 
+  // This function runs when a date is selected frmo the date picker element.
+  const onDateSelected = (event: any, selectedDate: Date | undefined): void => {
+    // 1. Hide the picker (important for Android)
+    setShowPicker(false);
+    if (event.type === "set" && selectedDate) {
+      // Update local state
+      setDatePicked(selectedDate);
+      console.log("Selected date:", selectedDate.toISOString().split("T")[0]);
+
+      selectedDate.setHours(0, 0, 0, 0); // Normalize the selected date to midnight to avoid timezone issues.
+      let selectedDateStr: string = selectedDate.toISOString().split("T")[0];
+
+      // Run your program here (e.g., fetch APOD for the selected date)
+      fetchAPODForDate(selectedDateStr);
+
+      // router.replace({
+      //   pathname: "/",
+      //   params: { date: selectedDateStr, direction: "next" },
+      // });
+    }
+  };
+
   // Function to navigate to the previous day's APOD when the user swipes left.
   const navigateToPrevDay = () => {
     // If no APOD is loaded, return early with loading text.
@@ -101,7 +131,7 @@ export default function Index() {
     // This will trigger a re-render and fetch the APOD for the previous day.
     router.replace({
       pathname: "/",
-      params: { date: prevDay.toISOString().split("T")[0] },
+      params: { date: prevDay.toISOString().split("T")[0], direction: "prev" },
     });
 
     return true;
@@ -136,7 +166,7 @@ export default function Index() {
     // This will trigger a re-render and fetch the APOD for the next day.
     router.replace({
       pathname: "/",
-      params: { date: nextDay.toISOString().split("T")[0] },
+      params: { date: nextDay.toISOString().split("T")[0], direction: "next" },
     });
 
     return true;
@@ -265,6 +295,62 @@ export default function Index() {
     }
   }, [date]); // Re-runs briefly every time a new APOD loads
 
+  async function fetchAPODForDate(datePicked: string) {
+    try {
+      console.log("Fetching APOD for date:", datePicked); // Debug log to verify the correct date is being used for fetching.
+      // Get the APOD based on the date passed as a parameter in the URL. If no date is passed, default to today's APOD.
+      const response = await fetch(
+        `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${datePicked}`,
+      );
+
+      // Should retrieve the APOD in JSON.
+      let data = await response.json();
+
+      // Make a loop to skiip any APODs that aren't images (e.g., videos) and fetch the next one until we find an
+      // image or reach a maximum number of tries to avoid infinite loops in case of unexpected API behavior.
+      let maxTries = 5;
+      let i = 0;
+      while (data.media_type !== "image" && i < maxTries) {
+        console.log("Media type is not an image, skipping ahead.");
+
+        if (paramsDirection === "prev") {
+          // If the user was navigating to the previous day, keep going back one day until we find an image.
+          const prevDay = new Date(datePicked);
+          prevDay.setDate(prevDay.getDate() - 1);
+          datePicked = prevDay.toISOString().split("T")[0];
+        } else if (paramsDirection === "next") {
+          // If the user was navigating to the next day, keep going forward one day until we find an image.
+          const nextDay = new Date(date);
+          nextDay.setDate(nextDay.getDate() + 1);
+          datePicked = nextDay.toISOString().split("T")[0];
+        }
+
+        // Fetch the APOD with the new date.
+        const nextResponse = await fetch(
+          `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${datePicked}`,
+        );
+        data = await nextResponse.json();
+        i++;
+      }
+
+      // Debug log for tesing purposes.
+      console.log(data);
+
+      // Update the state variable with the fetched APOD data.
+      setApod(data);
+
+      // Cache the fetched APOD in the pastQueries dictionary with the date as the key.
+      pastQueries[datePicked] = data;
+
+      router.replace({
+        pathname: "/",
+        params: { date: datePicked, direction: "next" },
+      });
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
   async function fetchApods() {
     try {
       // Get the APOD based on the date passed as a parameter in the URL. If no date is passed, default to today's APOD.
@@ -273,7 +359,37 @@ export default function Index() {
       );
 
       // Should retrieve the APOD in JSON.
-      const data = await response.json();
+      let data = await response.json();
+      console.log("direction from params is ", paramsDirection);
+
+      // Make a loop to skiip any APODs that aren't images (e.g., videos) and fetch the next one until we find an
+      // image or reach a maximum number of tries to avoid infinite loops in case of unexpected API behavior.
+      let maxTries = 5;
+      let i = 0;
+      while (data.media_type !== "image" && i < maxTries) {
+        console.log("Media type is not an image, skipping ahead.");
+
+        console.log("direction from params is ", paramsDirection);
+
+        if (paramsDirection === "prev") {
+          // If the user was navigating to the previous day, keep going back one day until we find an image.
+          const prevDay = new Date(date);
+          prevDay.setDate(prevDay.getDate() - 1);
+          date = prevDay.toISOString().split("T")[0];
+        } else if (paramsDirection === "next") {
+          // If the user was navigating to the next day, keep going forward one day until we find an image.
+          const nextDay = new Date(date);
+          nextDay.setDate(nextDay.getDate() + 1);
+          date = nextDay.toISOString().split("T")[0];
+        }
+
+        // Fetch the APOD with the new date.
+        const nextResponse = await fetch(
+          `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${date}`,
+        );
+        data = await nextResponse.json();
+        i++;
+      }
 
       // Debug log for tesing purposes.
       console.log(data);
@@ -334,6 +450,30 @@ export default function Index() {
             >
               {apod?.date}
             </Text>
+
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Button
+                title="Select a Date"
+                onPress={() => setShowPicker(true)}
+              />
+
+              {showPicker && (
+                <DateTimePicker
+                  value={datePicked}
+                  mode="date"
+                  display="default"
+                  onChange={onDateSelected}
+                  minimumDate={new Date("1995-06-16")} // APOD started on June 16, 1995, so set that as the minimum date.
+                  maximumDate={new Date()} // Prevent selecting future dates
+                />
+              )}
+            </View>
             <Toast />
           </View>
         </Animated.View>
