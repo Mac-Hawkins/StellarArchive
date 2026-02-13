@@ -4,6 +4,8 @@ AstroMobileApp is a mobile application that fetches astronomy images of the day 
 
 This application is just a side project of mine as I wanted to gain more exposure to REACT Native, Expo, and using REST APIs.
 
+[![AstroMobileApp Demo](https://img.youtube.com/vi/3zu7TlUqJJA/0.jpg)](https://youtu.be/3zu7TlUqJJA)
+
 ## Prerequisites
 
 - Node.js (v20.x or later, LTS recommended) This project was developed using Node.js v24.
@@ -11,15 +13,16 @@ This application is just a side project of mine as I wanted to gain more exposur
 ## Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/Mac-Hawkins/AstroMobileApp.git
    cd AstroMobileApp  # Navigate into the project directory
    ```
 
 2. **Install dependencies**
-Run the following command to install all required packages:
+   Run the following command to install all required packages:
 
-```npm install```
+`npm install`
 
 3. **Get a NASA API Key**
 
@@ -30,14 +33,14 @@ Once you receive your key, create a .env file in the root directory of the proje
 
 Add your NASA API key to the .env file using the following format:
 
-```EXPO_PUBLIC_NASA_API_KEY=your_nasa_api_key_here```
+`EXPO_PUBLIC_NASA_API_KEY=your_nasa_api_key_here`
 
 Refer to the .env.example file for guidance.
 
 5. **Start the app**
-Launch the app with:
+   Launch the app with:
 
-```npx expo start```
+`npx expo start`
 
 This will start the Expo development server. Follow the prompts to run the app on your device or emulator. I personally used Expo Go.
 
