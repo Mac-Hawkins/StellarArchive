@@ -8,8 +8,14 @@ export const useApodStore = create((set) => ({
   pastQueries: {},
   // The state of the BottomSheet.
   isSheetOpen: false,
+  currentDate: "",
+  swipeDirection: "",
 
-  // The actions (functions to change the state)
+  // Function to set the current APOD date and swipe direction for a given date.
+  setApodDate: (date, direction) =>
+    set({ currentDate: date, swipeDirection: direction }),
+
+  // The actions (functions to change the state of the BottomSheet)
   openSheet: () => set({ isSheetOpen: true }),
   closeSheet: () => set({ isSheetOpen: false }),
 }));
