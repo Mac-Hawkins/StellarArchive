@@ -478,7 +478,7 @@ export default function Index() {
               </TouchableWithoutFeedback>
             </View>
 
-            <View style={{ alignItems: "center", paddingBottom: 20 }}>
+            <View style={{ alignItems: "center", paddingBottom: 40 }}>
               {/* The date of the APOD image */}
               <Text
                 style={{
