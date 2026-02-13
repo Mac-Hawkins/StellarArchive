@@ -4,11 +4,10 @@ Features
 1. Allow screen to flip when phone is held landscape vs vertically.
 2. Add loading text when waiting for an image to load.
 3. Cleanup index.tsx.
-4. Add some sort of indication that users up. Arrows maybe?
+4. Add some sort of indication that users can swipe up. Arrows maybe?
 5. Add a backend to allow user's to create accounts.
 6. Allow users to record favorite APODs.
-7. Shrink the date, APOD, and APOD title when the explanation is brought up.
-8. Make the select date buttons static in same section as title so it doesn't get moved when swiped.
-9. Make the date picker start from the current date you are viewing.
+7. Shrink the APOD, and APOD title when the explanation is brought up.
+8. Make the date picker start from the current date you are viewing.
 
 Bugs
