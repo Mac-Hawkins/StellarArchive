@@ -283,11 +283,8 @@ export default function Index() {
         // withSpring needs to be nested in each other as they are async and therefore non-blocking.
         // 1. Peek Left
         translateX.value = withSpring(-40, {}, () => {
-          // 2. Peek Right
-          translateX.value = withSpring(40, {}, () => {
-            // 3. Snap back to Center
-            translateX.value = withSpring(0);
-          });
+          // 3. Snap back to Center
+          translateX.value = withSpring(0);
         });
       }, 2000); // Wait a bit after the APOD loads to start the peek animation
 
@@ -407,6 +404,20 @@ export default function Index() {
   return (
     // GestureDetector must be wrapped by GestureHandlerRootView.
     <GestureHandlerRootView>
+      <View>
+        <Button title="Select a Date" onPress={() => setShowPicker(true)} />
+
+        {showPicker && (
+          <DateTimePicker
+            value={datePicked}
+            mode="date"
+            display="default"
+            onChange={onDateSelected}
+            minimumDate={new Date("1995-06-16")} // APOD started on June 16, 1995, so set that as the minimum date.
+            maximumDate={new Date()} // Prevent selecting future dates
+          />
+        )}
+      </View>
       {/* // Wrap in GestureDetector to handle swipe gestures for navigation between APODs. */}
       <GestureDetector gesture={gestures}>
         <Animated.View style={[{ flex: 1 }, animatedCardStyle]}>
@@ -417,40 +428,20 @@ export default function Index() {
               alignItems: "center",
             }}
           >
-            {/* The title of the APOD image */}
-            <Text
-              style={{
-                fontSize: 24,
-                fontWeight: "bold",
-                marginBottom: 40,
-                textAlign: "center",
-              }}
-            >
-              {apod?.title}
-            </Text>
+            <View style={{ alignItems: "center", paddingTop: 20 }}>
+              {/* The title of the APOD image */}
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
+              >
+                {apod?.title}
+              </Text>
+            </View>
 
-            {/* The APOD image itself. resizeMode: "contain" ensures the image fits within the view without stretching or getting cut off. */}
-            <Image
-              style={{
-                width: screenWidth * 0.9,
-                height: screenHeight * 0.5,
-                resizeMode: "contain",
-              }}
-              source={{ uri: apod?.url }}
-            />
-
-            {/* The date of the APOD image */}
-            <Text
-              style={{
-                fontSize: 24,
-                fontWeight: "bold",
-                marginTop: 80,
-                textAlign: "center",
-              }}
-            >
-              {apod?.date}
-            </Text>
-
+            {/* APOD image (centered) */}
             <View
               style={{
                 flex: 1,
@@ -458,22 +449,31 @@ export default function Index() {
                 alignItems: "center",
               }}
             >
-              <Button
-                title="Select a Date"
-                onPress={() => setShowPicker(true)}
+              {/* The APOD image itself. resizeMode: "contain" ensures the image fits within the view without stretching or getting cut off. */}
+              <Image
+                style={{
+                  width: screenWidth * 0.9,
+                  height: screenHeight * 0.9,
+                  resizeMode: "contain",
+                }}
+                source={{ uri: apod?.url }}
               />
-
-              {showPicker && (
-                <DateTimePicker
-                  value={datePicked}
-                  mode="date"
-                  display="default"
-                  onChange={onDateSelected}
-                  minimumDate={new Date("1995-06-16")} // APOD started on June 16, 1995, so set that as the minimum date.
-                  maximumDate={new Date()} // Prevent selecting future dates
-                />
-              )}
             </View>
+
+            <View style={{ alignItems: "center", paddingBottom: 20 }}>
+              {/* The date of the APOD image */}
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "100%",
+                }}
+              >
+                {apod?.date}
+              </Text>
+            </View>
+
             <Toast />
           </View>
         </Animated.View>
