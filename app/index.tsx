@@ -3,7 +3,16 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Button, Dimensions, Image, Text, View } from "react-native";
+import {
+  Button,
+  Dimensions,
+  Image,
+  Modal,
+  StatusBar,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import {
   Directions,
   Gesture,
@@ -46,8 +55,9 @@ export default function Index() {
 
   // apods being the APOD itself, and setApod being the function to update the state variable APOD.
   const [apod, setApod] = useState<Apod>(); // State variable to store the fetched APOD.
-  const [showPicker, setShowPicker] = useState(false);
-  const [datePicked, setDatePicked] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false); // State variable to control whether the date picker is visible or not.
+  const [datePicked, setDatePicked] = useState(new Date()); // State variable to store the date selected from the date picker. Defaults to current date.
+  const [isFullScreen, setIsFullScreen] = useState(false); // State variable to track whether the APOD image is in full screen mode or not.
 
   const closeSheet = useApodStore((state) => state.closeSheet);
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -91,6 +101,17 @@ export default function Index() {
     });
   };
 
+  // Hides the status/natification bar to when the image is enlarged make it more immersive.
+  // When the user exits full screen mode, show the status bar again.
+  useEffect(() => {
+    if (isFullScreen) {
+      StatusBar.setHidden(true);
+    } else {
+      StatusBar.setHidden(false);
+    }
+    return () => StatusBar.setHidden(false);
+  }, [isFullScreen]);
+
   // This function runs when a date is selected frmo the date picker element.
   const onDateSelected = (event: any, selectedDate: Date | undefined): void => {
     // 1. Hide the picker (important for Android)
@@ -105,11 +126,6 @@ export default function Index() {
 
       // Run your program here (e.g., fetch APOD for the selected date)
       fetchAPODForDate(selectedDateStr);
-
-      // router.replace({
-      //   pathname: "/",
-      //   params: { date: selectedDateStr, direction: "next" },
-      // });
     }
   };
 
@@ -449,15 +465,17 @@ export default function Index() {
                 alignItems: "center",
               }}
             >
-              {/* The APOD image itself. resizeMode: "contain" ensures the image fits within the view without stretching or getting cut off. */}
-              <Image
-                style={{
-                  width: screenWidth * 0.9,
-                  height: screenHeight * 0.9,
-                  resizeMode: "contain",
-                }}
-                source={{ uri: apod?.url }}
-              />
+              <TouchableWithoutFeedback onPress={() => setIsFullScreen(true)}>
+                {/* The APOD image itself. resizeMode: "contain" ensures the image fits within the view without stretching or getting cut off. */}
+                <Image
+                  style={{
+                    width: screenWidth * 0.9,
+                    height: screenHeight * 0.6,
+                    resizeMode: "contain",
+                  }}
+                  source={{ uri: apod?.url }}
+                />
+              </TouchableWithoutFeedback>
             </View>
 
             <View style={{ alignItems: "center", paddingBottom: 20 }}>
@@ -473,11 +491,34 @@ export default function Index() {
                 {apod?.date}
               </Text>
             </View>
-
             <Toast />
           </View>
         </Animated.View>
       </GestureDetector>
+
+      {/* Modal to display the APOD image in full screen when the user taps on it. */}
+      <Modal visible={isFullScreen} statusBarTranslucent={true}>
+        <TouchableWithoutFeedback onPress={() => setIsFullScreen(false)}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgb(0, 0, 0)",
+            }}
+          >
+            <Image
+              style={{
+                height: "99%",
+                width: "99%",
+                resizeMode: "contain",
+              }}
+              source={{ uri: apod?.url }}
+            />
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
       {/* Used a BottomSheet to make it a little more obvious that it can be dragged and swiped away. */}
       <BottomSheet
         ref={bottomSheetRef}
