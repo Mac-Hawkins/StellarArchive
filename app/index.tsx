@@ -273,11 +273,11 @@ export default function Index() {
 
   // Use effect for moving the screen left and right a little bit to indicate that user's can swipe to a new APOD.
   useEffect(() => {
-    // Don't bother running the animation if we have already been here.
-    if (pastQueries[date]) {
-      console.log("APOD for this date found in cache, using cached data.");
-      return;
-    } else {
+    let currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    let currentDateStr = currentDate.toISOString().split("T")[0];
+    // Only run the animation if we are looking at the APOD for the current date (basically home screen).
+    if (currentDateStr === date) {
       // Wait a tiny bit after mount so the user sees the photo first
       const timeout = setTimeout(() => {
         // withSpring needs to be nested in each other as they are async and therefore non-blocking.
