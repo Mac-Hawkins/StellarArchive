@@ -15,21 +15,10 @@ export default function RootLayout() {
         name="index"
         options={{
           headerTitle: "Astronomy Picture of the Day",
+          headerTitleStyle: { fontSize: 24, fontWeight: "bold" },
           headerTitleAlign: "center", // This centers the title
           headerBackVisible: false, // Hides the back button on the index screen
           headerStyle: { backgroundColor: "#acacc7" },
-        }}
-      />
-
-      <Stack.Screen
-        name="apod_explanation"
-        options={{
-          title: "Explanation",
-          headerShown: false, // Hide native header to use a custom one (gorhom bottom-sheet).
-          headerTitleAlign: "center", // This centers the title
-          headerBackButtonDisplayMode: "minimal", // Removes back arrow.
-          headerStyle: { backgroundColor: "#6679cc" },
-          presentation: "transparentModal", // This makes the screen appear as a modal, sliding up from the bottom.
         }}
       />
     </Stack>
