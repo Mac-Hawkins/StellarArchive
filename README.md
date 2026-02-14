@@ -1,4 +1,4 @@
-# Welcome to StellarArchive
+# Welcome to Stellar Archive
 
 StellarArchive is a mobile application that fetches NASA's Astronomy Photo of the Day using [NASA's APOD API](https://api.nasa.gov/).
 
