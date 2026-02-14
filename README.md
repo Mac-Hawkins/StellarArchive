@@ -1,12 +1,12 @@
-# Welcome to AstroMobileApp
+# Welcome to StellarArchive
 
-AstroMobileApp is a mobile application that fetches NASA's Astronomy Photo of the Day using [NASA's APOD API](https://api.nasa.gov/).
+StellarArchive is a mobile application that fetches NASA's Astronomy Photo of the Day using [NASA's APOD API](https://api.nasa.gov/).
 
 This application is just a side project of mine as I wanted to gain more exposure to REACT Native, Expo, and using REST APIs.
 
-## AstroMobileApp Demo
+## Stellar Archive Demo
 
-[![AstroMobileApp Demo](https://img.youtube.com/vi/AeAneSDg8DI/0.jpg)](https://youtu.be/AeAneSDg8DI)
+[![Stellar Archive Demo](https://img.youtube.com/vi/gV4Tb_dCWro/0.jpg)](https://youtu.be/gV4Tb_dCWro)
 
 ## Prerequisites
 
@@ -17,8 +17,8 @@ This application is just a side project of mine as I wanted to gain more exposur
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/Mac-Hawkins/AstroMobileApp.git
-   cd AstroMobileApp  # Navigate into the project directory
+   git clone https://github.com/Mac-Hawkins/StellarArchive.git
+   cd StellarArchive  # Navigate into the project directory
    ```
 
 2. **Install dependencies**
