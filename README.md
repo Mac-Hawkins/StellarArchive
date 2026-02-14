@@ -6,7 +6,7 @@ This application is just a side project of mine as I wanted to gain more exposur
 
 ## AstroMobileApp Demo
 
-[![AstroMobileApp Demo](https://img.youtube.com/vi/3zu7TlUqJJA/0.jpg)](https://youtu.be/3zu7TlUqJJA)
+[![AstroMobileApp Demo](https://img.youtube.com/vi/AeAneSDg8DI/0.jpg)](https://youtu.be/AeAneSDg8DI)
 
 ## Prerequisites
 
