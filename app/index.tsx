@@ -25,16 +25,17 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import Toast from "react-native-toast-message";
-import { styles } from "./index.styles";
-import { useApodStore } from "./store/ApodStore.js";
-import { Apod } from "./types/apod";
-import { SwipeDirection } from "./types/swipeDirection";
+import { useApodStore } from "../src/store/ApodStore";
+import { SwipeDirection } from "../src/types/enums/SwipeDirection";
+import { ToastType } from "../src/types/enums/ToastType";
+import { Apod } from "../src/types/interfaces/Apod";
 import {
   createCurrentDate,
   decrementDate,
   formatDateToStr,
   incrementDate,
-} from "./utils/dateFormatting";
+} from "../src/utils/DateFormatting";
+import { styles } from "./index.styles";
 
 // Constants
 const API_KEY = process.env.EXPO_PUBLIC_NASA_API_KEY; // Retrieve NASA_API_KEY from .env file.
@@ -75,7 +76,7 @@ export default function Index() {
   const translateX = useSharedValue(0);
 
   // General method for showing a toast message at the bottom of the screen.
-  const showToast = (message: string) => {
+  const showToast = (message: string, type: string) => {
     Toast.show({
       type: "info",
       text1: message,
@@ -146,7 +147,7 @@ export default function Index() {
     // Prevent users from swiping right to navigate to future APODs that haven't been released yet.
     // If the current APOD is today's date, return early and don't navigate to the next day.
     if (nextDay >= today) {
-      showToast("No APODs from the future!"); // Show a toast message to inform the user that they can't navigate to future APODs.
+      showToast("No APODs from the future!", ToastType.INFO); // Show a toast message to inform the user that they can't navigate to future APODs.
       return false;
     }
 
@@ -291,13 +292,13 @@ export default function Index() {
       while (data.media_type !== "image" && i < MAX_APOD_SKIPS) {
         console.log("Media type is not an image, skipping ahead.");
 
-        // If the user was navigating to the previous day,
-        // keep going back one day until we find an image.
-        // Otherwise keep going next.
+        // If the user was navigating to the next day,
+        // keep going forward one day until we find an image.
+        // Otherwise keep going back.
         date =
-          swipeDirection === SwipeDirection.LEFT
-            ? decrementDate(date)
-            : incrementDate(date);
+          swipeDirection === SwipeDirection.RIGHT
+            ? incrementDate(date)
+            : decrementDate(date);
 
         // Fetch the APOD with the new date.
         const nextResponse = await fetch(
@@ -326,7 +327,12 @@ export default function Index() {
       pastQueries[date] = data;
       setDate(date, swipeDirection); // Update the current date and swipe direction in ApodStore so that the next screen can fetch the correct APOD based on the date and direction.
     } catch (error) {
+      translateX.value = 0;
       console.error("Error fetching data:", error);
+      showToast(
+        "No able to retrieve image data! Please try again later.",
+        ToastType.ERROR,
+      );
     }
   }
 

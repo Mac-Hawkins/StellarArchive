@@ -2,7 +2,7 @@
 
 StellarArchive is a mobile application that fetches NASA's Astronomy Photo of the Day using [NASA's APOD API](https://api.nasa.gov/).
 
-This application is just a side project of mine as I wanted to gain more exposure to REACT Native, Expo, and using REST APIs.
+This application is just a side project of mine as I wanted to gain more exposure in mobile development including React Native, Expo, and REST APIs.
 
 ## Stellar Archive Demo
 
