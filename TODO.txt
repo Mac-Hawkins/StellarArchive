@@ -8,6 +8,5 @@ Features
 5. Add a backend to allow user's to create accounts.
 6. Allow users to record favorite APODs.
 7. Shrink the APOD, and APOD title when the explanation is brought up.
-8. Make the date picker start from the current date you are viewing.
 
 Bugs

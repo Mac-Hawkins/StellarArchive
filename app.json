@@ -3,7 +3,7 @@
     "name": "AstroMobileApp",
     "slug": "AstroMobileApp",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "portrait", // change to default to allow both potrait and landscape
     "icon": "./assets/images/icon.png",
     "scheme": "astromobileapp",
     "userInterfaceStyle": "automatic",
