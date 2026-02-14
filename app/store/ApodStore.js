@@ -9,7 +9,7 @@ export const useApodStore = create((set) => ({
   // The state of the BottomSheet.
   isSheetOpen: false,
   currentDate: "",
-  swipeDirection: "",
+  swipeDirection: null,
 
   // Function to set the current APOD date and swipe direction for a given date.
   setApodDate: (date, direction) =>
