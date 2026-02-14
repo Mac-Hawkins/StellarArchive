@@ -238,7 +238,6 @@ export default function Index() {
     if (date === "") {
       date = formatDateToStr(new Date());
       console.log("Date was empty, setting to current date:", date);
-      return; // The store update will trigger this useEffect to run again with the correct date.
     }
 
     if (pastQueries[date]) {
