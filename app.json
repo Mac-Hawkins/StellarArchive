@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "AstroMobileApp",
-    "slug": "AstroMobileApp",
+    "name": "StellarArchive",
+    "slug": "StellarArchive",
     "version": "1.0.0",
     "orientation": "portrait", // change to default to allow both potrait and landscape
     "icon": "./assets/images/icon.png",
-    "scheme": "astromobileapp",
+    "scheme": "stellararchive",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
