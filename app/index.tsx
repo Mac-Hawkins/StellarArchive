@@ -1,17 +1,12 @@
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { ApodCard } from "@/src/components/ApodCard";
+import { ApodFullScreenModal } from "@/src/components/ApodFullScreenModal";
+import { DatePicker } from "@/src/components/DatePicker";
+import { ExplanationBottomSheet } from "@/src/components/ExplanationBottomSheet";
+import BottomSheet from "@gorhom/bottom-sheet";
+import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useRef, useState } from "react";
-import {
-  Button,
-  Dimensions,
-  Image,
-  Modal,
-  StatusBar,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { Dimensions, StatusBar } from "react-native";
 import {
   Directions,
   Gesture,
@@ -35,7 +30,6 @@ import {
   formatDateToStr,
   incrementDate,
 } from "../src/utils/DateFormatting";
-import { styles } from "./index.styles";
 
 // Constants
 const API_KEY = process.env.EXPO_PUBLIC_NASA_API_KEY; // Retrieve NASA_API_KEY from .env file.
@@ -52,7 +46,7 @@ export default function Index() {
 
   // States
   const [apod, setApod] = useState<Apod>(); // State variable to store and update the APOD.
-  const [showPicker, setShowPicker] = useState(false); // State variable to control whether the date picker is visible or not.
+  const [showDatePicker, setShowDatePicker] = useState(false); // State variable to control whether the date picker is visible or not.
   const [datePicked, setDatePicked] = useState(new Date()); // State variable to store the date selected from the date picker. Defaults to current date.
   const [isFullScreen, setIsFullScreen] = useState(false); // State variable to track whether the APOD image is in full screen mode or not.
   const closeSheet = useApodStore((state) => state.closeSheet); // getter for close explanation sheet state var.
@@ -96,9 +90,12 @@ export default function Index() {
   }, [isFullScreen]);
 
   // This function runs when a date is selected from the date picker element.
-  const onDateSelected = (event: any, selectedDate: Date | undefined): void => {
+  const onDatePicked = (
+    event: DateTimePickerEvent,
+    selectedDate: Date | undefined,
+  ): void => {
     // 1. Hide the picker (important for Android)
-    setShowPicker(false);
+    setShowDatePicker(false);
     if (event.type === "set" && selectedDate) {
       // Update local state
       setDatePicked(selectedDate);
@@ -340,76 +337,35 @@ export default function Index() {
   return (
     // GestureDetector must be wrapped by GestureHandlerRootView.
     <GestureHandlerRootView>
-      <View>
-        <Button title="Select a Date" onPress={() => setShowPicker(true)} />
+      {/* The component for picking the date to go to. */}
+      <DatePicker
+        showDatePicker={showDatePicker}
+        datePicked={datePicked}
+        setShowDatePicker={() => setShowDatePicker(true)}
+        onDatePicked={onDatePicked}
+      ></DatePicker>
 
-        {showPicker && (
-          <DateTimePicker
-            value={datePicked}
-            mode="date"
-            display="default"
-            onChange={onDateSelected}
-            minimumDate={new Date("1995-06-16")} // APOD started on June 16, 1995, so set that as the minimum date.
-            maximumDate={createCurrentDate()} // Prevent selecting future dates
-          />
-        )}
-      </View>
       {/* // Wrap in GestureDetector to handle swipe gestures for navigation between APODs. */}
       <GestureDetector gesture={gestures}>
         <Animated.View style={[{ flex: 1 }, animatedCardStyle]}>
-          <View style={styles.containerApodView}>
-            {/* The title of the APOD image */}
-            <View style={{ alignItems: "center", paddingTop: 30 }}>
-              <Text style={styles.textApodTitle}>{apod?.title}</Text>
-            </View>
-
-            {/* APOD image (centered) */}
-            <View style={styles.containerImgView}>
-              <TouchableWithoutFeedback onPress={() => setIsFullScreen(true)}>
-                <Image
-                  style={styles.imageApodNormal}
-                  source={{ uri: apod?.url }}
-                />
-              </TouchableWithoutFeedback>
-            </View>
-
-            {/* The date of the APOD image */}
-            <View style={{ alignItems: "center", paddingBottom: 40 }}>
-              <Text style={styles.textDate}>{apod?.date}</Text>
-            </View>
-            <Toast />
-          </View>
+          {/* The component for the APOD title, image, and date. */}
+          <ApodCard apod={apod} onOpen={() => setIsFullScreen(true)}></ApodCard>
         </Animated.View>
       </GestureDetector>
 
       {/* Modal to display the APOD image in full screen when the user taps on it. */}
-      <Modal visible={isFullScreen} statusBarTranslucent={true}>
-        <TouchableWithoutFeedback onPress={() => setIsFullScreen(false)}>
-          <View style={styles.viewImageFull}>
-            <Image style={styles.imageFull} source={{ uri: apod?.url }} />
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+      <ApodFullScreenModal
+        apod={apod}
+        isFullScreen={isFullScreen}
+        onClose={() => setIsFullScreen(false)}
+      ></ApodFullScreenModal>
 
-      {/* Used a BottomSheet to make it a little more obvious that it can be dragged and swiped away. */}
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={-1}
-        enablePanDownToClose={true} // Allows swiping away the bottom sheet by swiping down.
-        snapPoints={["25%", "80%"]}
-        onClose={closeSheet} // When the bottom sheet is closed, call the closeSheet function to update the state in ApodStore.
-      >
-        {/* Used a BottomSheetScrollView so I could have a title */}
-        <BottomSheetScrollView>
-          {/* Header */}
-          <View>
-            <Text style={styles.textExplanationTitle}>Explanation</Text>
-
-            {/* Display the explanation of the APOD, which is passed as a parameter. */}
-            <Text style={styles.textExplanation}>{apod?.explanation}</Text>
-          </View>
-        </BottomSheetScrollView>
-      </BottomSheet>
+      {/* The component for the APOD explanation, which can be dragged up from bottom. */}
+      <ExplanationBottomSheet
+        apod={apod}
+        bottomSheetRef={bottomSheetRef}
+        onCloseSheet={closeSheet}
+      ></ExplanationBottomSheet>
     </GestureHandlerRootView>
   );
 }
