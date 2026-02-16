@@ -2,11 +2,12 @@ import { ApodCard } from "@/src/components/ApodCard";
 import { ApodFullScreenModal } from "@/src/components/ApodFullScreenModal";
 import { DatePicker } from "@/src/components/DatePicker";
 import { ExplanationBottomSheet } from "@/src/components/ExplanationBottomSheet";
+import { ExplanationIndicator } from "@/src/components/ExplanationIndicator";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useRef, useState } from "react";
-import { Dimensions, StatusBar } from "react-native";
+import { StatusBar } from "react-native";
 import {
   Directions,
   Gesture,
@@ -17,9 +18,11 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
+  withRepeat,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
-import Toast from "react-native-toast-message";
+import { API_KEY, SCREEN_WIDTH } from "../src/constants/config";
 import { useApodStore } from "../src/store/ApodStore";
 import { SwipeDirection } from "../src/types/enums/SwipeDirection";
 import { ToastType } from "../src/types/enums/ToastType";
@@ -30,14 +33,12 @@ import {
   formatDateToStr,
   incrementDate,
 } from "../src/utils/DateFormatting";
+import { showToast } from "../src/utils/ToastMessages";
 
 // Constants
-const API_KEY = process.env.EXPO_PUBLIC_NASA_API_KEY; // Retrieve NASA_API_KEY from .env file.
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const SCREEN_HEIGHT = Dimensions.get("window").height;
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3; // Swipe 30% of screen to trigger navigation.
-const CARD_ANIMATION_DELAY = 2000; // Time to wait before new APOD swipes in. Need time to wait for APOD to load.
-const MAX_APOD_SKIPS = 5; // Number of tries to get the next or prev APOD if current one isn't an image.
+export const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3; // Swipe 30% of screen to trigger navigation.
+export const CARD_ANIMATION_DELAY = 2000; // Time to wait before new APOD swipes in. Need time to wait for APOD to load.
+export const MAX_APOD_SKIPS = 5; // Number of tries to get the next or prev APOD if current one isn't an image.
 
 // Entry point of application. This is the first screen that users see when they open the app.
 export default function Index() {
@@ -61,6 +62,7 @@ export default function Index() {
   let date = useApodStore((state) => state.currentDate); // getter
   const pastQueries = useApodStore((state) => state.pastQueries);
   const setDate = useApodStore((state) => state.setApodDate); // setter
+  const cacheApod = useApodStore((state) => state.cacheApodData);
 
   console.log("Date parameter from URL:", date); // Debug log to verify the date parameter is being retrieved correctly from the URL.
 
@@ -69,14 +71,8 @@ export default function Index() {
   // which can be used to trigger navigation between APODs when a certain threshold is reached.
   const translateX = useSharedValue(0);
 
-  // General method for showing a toast message at the bottom of the screen.
-  const showToast = (message: string, type: string) => {
-    Toast.show({
-      type: "info",
-      text1: message,
-      position: "bottom",
-    });
-  };
+  //
+  const translateY = useSharedValue(0);
 
   // Hides the status/natification bar to when the image is enlarged make it more immersive.
   // When the user exits full screen mode, show the status bar again.
@@ -231,7 +227,26 @@ export default function Index() {
     }
   }, [isSheetOpen, isFocused]); // Re-run the effect when the date or sheet state changes (i.e., when user swipes to a different day).
 
-  // useEffect that runs everytime date changes.
+  // Use effect for moving the screen left and right a little bit to indicate that user's can swipe to a new APOD.
+  useEffect(() => {
+    let currentDateStr = formatDateToStr(new Date());
+    // Only run the animation if we are looking at the APOD for the current date (basically home screen).
+    if (currentDateStr === date) {
+      // Wait a tiny bit after mount so the user sees the photo first
+      const timeout = setTimeout(() => {
+        // withSpring needs to be nested in each other as they are async and therefore non-blocking.
+        // 1. Peek Left
+        translateX.value = withSpring(-40, {}, () => {
+          // 2. Snap back to Center
+          translateX.value = withSpring(0);
+        });
+      }, CARD_ANIMATION_DELAY); // Wait a bit after the APOD loads to start the peek animation
+
+      return () => clearTimeout(timeout);
+    }
+  }, [date]); // Re-runs briefly every time a new APOD loads
+
+  // useEffect for fetching the next/prev APOD. Runs everytime date changes.
   useEffect(() => {
     if (date === "") {
       date = formatDateToStr(new Date());
@@ -254,26 +269,17 @@ export default function Index() {
     }
   }, [date]); // Only runs when the date changes
 
-  // Use effect for moving the screen left and right a little bit to indicate that user's can swipe to a new APOD.
+  // Use effect for moving the carrot up from the bottom to indicate that users can swipe up.
   useEffect(() => {
-    let currentDateStr = formatDateToStr(new Date());
-    // Only run the animation if we are looking at the APOD for the current date (basically home screen).
-    if (currentDateStr === date) {
-      // Wait a tiny bit after mount so the user sees the photo first
-      const timeout = setTimeout(() => {
-        // withSpring needs to be nested in each other as they are async and therefore non-blocking.
-        // 1. Peek Left
-        translateX.value = withSpring(-40, {}, () => {
-          // 2. Snap back to Center
-          translateX.value = withSpring(0);
-        });
-      }, CARD_ANIMATION_DELAY); // Wait a bit after the APOD loads to start the peek animation
+    // Start the bounce animation when component mounts
+    translateY.value = withRepeat(
+      withTiming(-20, { duration: 1500 }), // Move up 10px over 800ms
+      -1, // Repeat infinitely
+      true, // Reverse (bounce back down)
+    );
+  }, []); // Only start when the component originally mounts.
 
-      return () => clearTimeout(timeout);
-    }
-  }, [date]); // Re-runs briefly every time a new APOD loads
-
-  async function fetchApods() {
+  const fetchApods = async () => {
     try {
       // Get the APOD based on the date passed as a parameter in the URL. If no date is passed, default to today's APOD.
       const response = await fetch(
@@ -331,7 +337,7 @@ export default function Index() {
         ToastType.ERROR,
       );
     }
-  }
+  };
 
   // Rendering
   return (
@@ -343,7 +349,7 @@ export default function Index() {
         datePicked={datePicked}
         setShowDatePicker={() => setShowDatePicker(true)}
         onDatePicked={onDatePicked}
-      ></DatePicker>
+      />
 
       {/* // Wrap in GestureDetector to handle swipe gestures for navigation between APODs. */}
       <GestureDetector gesture={gestures}>
@@ -359,6 +365,10 @@ export default function Index() {
         isFullScreen={isFullScreen}
         onClose={() => setIsFullScreen(false)}
       ></ApodFullScreenModal>
+
+      <Animated.View style={{ transform: [{ translateY }] }}>
+        <ExplanationIndicator />
+      </Animated.View>
 
       {/* The component for the APOD explanation, which can be dragged up from bottom. */}
       <ExplanationBottomSheet

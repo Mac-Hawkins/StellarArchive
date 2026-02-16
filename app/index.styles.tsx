@@ -42,6 +42,13 @@ export const styles = StyleSheet.create({
     width: "99%",
     resizeMode: "contain",
   },
+  textExplanationIndicator: {
+    fontSize: 60,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "lightgray",
+    marginBottom: 0,
+  },
   textExplanationTitle: {
     backgroundColor: "#1a181820",
     borderRadius: 20,

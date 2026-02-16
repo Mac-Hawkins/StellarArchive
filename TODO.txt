@@ -1,12 +1,15 @@
 TODO
 
 Features
-1. Allow screen to flip when phone is held landscape vs vertically.
-2. Add loading text when waiting for an image to load.
-3. Cleanup index.tsx.
-4. Add some sort of indication that users can swipe up. Arrows maybe?
-5. Add a backend to allow user's to create accounts.
-6. Allow users to record favorite APODs.
-7. Shrink the APOD, and APOD title when the explanation is brought up.
+
+    Frontend
+        1. Allow screen to flip when phone is held landscape vs vertically.
+        2. Add loading text when waiting for an image to load.
+        3. Shrink the APOD, and APOD title when the explanation is brought up.
+
+    Backend
+        1. Add a backend to allow user's to create accounts.
+        2. Allow users to record favorite APODs.
+        3. Allow users to comment on images.
 
 Bugs
