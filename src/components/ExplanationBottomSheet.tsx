@@ -2,6 +2,7 @@ import { styles } from "@/app/index.styles";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Text, View } from "react-native";
 import { Apod } from "../types/interfaces/Apod";
+//import { ArrowUpFromLine } from 'lucide-react';
 
 // This component is for displaing the explanation of the APOD as a bottom sheet that can be dragged
 // up from the bottom of the screen.
