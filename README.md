@@ -8,6 +8,14 @@ This application is just a side project of mine as I wanted to gain more exposur
 
 [![Stellar Archive Demo](https://img.youtube.com/vi/gV4Tb_dCWro/0.jpg)](https://youtu.be/gV4Tb_dCWro)
 
+## Database Schema
+
+![Database Schema](docs/schema.png)
+
+## Database Info
+
+This is just a some quick notes I'm making. I came up with the schema first. I then made a PostgreSQL database in AWS. I wrote the SQL to create the tables and used pgAdmin to actually create the tables with the SQL. See "database" folder and "docs" folder for the SQL and schema.
+
 ## Prerequisites
 
 - Node.js (v20.x or later, LTS recommended) This project was developed using Node.js v24.
