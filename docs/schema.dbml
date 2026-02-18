@@ -1,0 +1,34 @@
+// Used DBML to define database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table users {
+  id integer [primary key]
+  username varchar
+  password varchar
+}
+
+Table apods {
+    date date [primary key]
+    title varchar
+    image_url varchar
+    explanation varchar
+}
+
+Table favorites {
+  id integer [primary key]
+  user_id integer [not null]
+  apod_date date [not null]
+}
+
+Table comments {
+  id integer [primary key]
+  created_at timestamp
+  message varchar
+  user_id integer [not null]
+  apod_date date
+}
+
+Ref: comments.user_id > users.id // Many comments to one user
+Ref: comments.apod_date > apods.date // Many comments to one apod
+Ref: favorites.user_id > users.id // Many favorites to one user
+Ref: favorites.apod_date > apods.date // Many favorites to one apod
