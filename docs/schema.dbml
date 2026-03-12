@@ -2,33 +2,34 @@
 // Docs: https://dbml.dbdiagram.io/docs
 
 Table users {
-  id integer [primary key]
-  username varchar
-  password varchar
+  id serial [primary key, not null]
+  username varchar [not null]
+  password varchar [not null]
 }
 
 Table apods {
-    date date [primary key]
-    title varchar
-    image_url varchar
-    explanation varchar
+  id serial [primary key, not null]
+  date date [not null]
+  title varchar
+  image_url varchar [not null]
+  explanation text
 }
 
 Table favorites {
-  id integer [primary key]
+  id serial [primary key, not null]
   user_id integer [not null]
-  apod_date date [not null]
+  apod_id integer [not null]
 }
 
 Table comments {
-  id integer [primary key]
-  created_at timestamp
-  message varchar
+  id serial [primary key, not null]
+  created_at timestamp [not null]
+  message text [not null]
   user_id integer [not null]
-  apod_date date
+  apod_id integer [not null]
 }
 
 Ref: comments.user_id > users.id // Many comments to one user
-Ref: comments.apod_date > apods.date // Many comments to one apod
+Ref: comments.apod_id > apods.id // Many comments to one apod
 Ref: favorites.user_id > users.id // Many favorites to one user
-Ref: favorites.apod_date > apods.date // Many favorites to one apod
+Ref: favorites.apod_id > apods.id // Many favorites to one apod

@@ -14,7 +14,7 @@ This application is just a side project of mine as I wanted to gain more exposur
 
 ## Database Info
 
-This is just a some quick notes I'm making. I came up with the schema first. I then made a PostgreSQL database in AWS. I wrote the SQL to create the tables and used pgAdmin to actually create the tables with the SQL. See "database" folder and "docs" folder for the SQL and schema.
+I came up with the schema first using dbdiagram.io. I then made a PostgreSQL RDS in AWS based on that schema. I wrote the SQL to create the tables and used pgAdmin4 to actually create the tables with the SQL. See "database" folder and "docs" folder for the SQL and schema. I then made the API Gateways and Lambda functions in AWS to communicate with the RDS.
 
 ## Prerequisites
 
