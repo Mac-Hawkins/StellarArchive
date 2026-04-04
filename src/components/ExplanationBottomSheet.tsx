@@ -1,4 +1,4 @@
-import { styles } from "@/app/index.styles";
+import GalleryStyles from "@/app/Gallery.styles";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Text, View } from "react-native";
 import { Apod } from "../types/interfaces/Apod";
@@ -30,10 +30,10 @@ export const ExplanationBottomSheet = ({
       <BottomSheetScrollView>
         {/* Header */}
         <View>
-          <Text style={styles.textExplanationTitle}>Explanation</Text>
+          <Text style={GalleryStyles.textExplanationTitle}>Explanation</Text>
 
           {/* Display the explanation of the APOD, which is passed as a parameter. */}
-          <Text style={styles.textExplanation}>{apod?.explanation}</Text>
+          <Text style={GalleryStyles.textExplanation}>{apod?.explanation}</Text>
         </View>
       </BottomSheetScrollView>
     </BottomSheet>

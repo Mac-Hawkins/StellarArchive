@@ -11,6 +11,7 @@ Features
         6. Make a button in upper right or left to open and allow users to select a favorites tab to view to their favorite apods.
         7. Add UI to add comments.
         8. Make another option for users to see their comments.
+        9. There appears to be a bug now where it takes a while to load the first APOD or 2. This is after I added other screens.
         
 
     Backend

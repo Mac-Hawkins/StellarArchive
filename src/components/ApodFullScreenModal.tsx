@@ -1,4 +1,4 @@
-import { styles } from "@/app/index.styles";
+import GalleryStyles from "@/app/Gallery.styles";
 import { Image, Modal, TouchableWithoutFeedback, View } from "react-native";
 import { Apod } from "../types/interfaces/Apod";
 
@@ -18,8 +18,8 @@ export const ApodFullScreenModal = ({
   return (
     <Modal visible={isFullScreen} statusBarTranslucent={true}>
       <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.viewImageFull}>
-          <Image style={styles.imageFull} source={{ uri: apod?.url }} />
+        <View style={GalleryStyles.viewImageFull}>
+          <Image style={GalleryStyles.imageFull} source={{ uri: apod?.url }} />
         </View>
       </TouchableWithoutFeedback>
     </Modal>

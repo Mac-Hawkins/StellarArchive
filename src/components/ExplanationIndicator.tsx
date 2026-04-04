@@ -1,6 +1,6 @@
-import { styles } from "@/app/index.styles";
+import GalleryStyles from "@/app/Gallery.styles";
 import { Text } from "react-native";
 
 export const ExplanationIndicator = () => {
-  return <Text style={styles.textExplanationIndicator}>^</Text>;
+  return <Text style={GalleryStyles.textExplanationIndicator}>^</Text>;
 };

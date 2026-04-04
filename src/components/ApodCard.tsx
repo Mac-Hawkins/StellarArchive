@@ -1,4 +1,4 @@
-import { styles } from "@/app/index.styles";
+import GalleryStyles from "@/app/Gallery.styles";
 import { Image, Text, TouchableWithoutFeedback, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { Apod } from "../types/interfaces/Apod";
@@ -13,22 +13,25 @@ interface ApodCardProps {
 // and the image date.
 export const ApodCard = ({ apod, onOpen }: ApodCardProps) => {
   return (
-    <View style={styles.containerApodView}>
+    <View style={GalleryStyles.containerApodView}>
       {/* The title of the APOD image */}
       <View style={{ alignItems: "center", paddingTop: 30 }}>
-        <Text style={styles.textApodTitle}>{apod?.title}</Text>
+        <Text style={GalleryStyles.textApodTitle}>{apod?.title}</Text>
       </View>
 
       {/* APOD image (centered) */}
-      <View style={styles.containerImgView}>
+      <View style={GalleryStyles.containerImgView}>
         <TouchableWithoutFeedback onPress={onOpen}>
-          <Image style={styles.imageApodNormal} source={{ uri: apod?.url }} />
+          <Image
+            style={GalleryStyles.imageApodNormal}
+            source={{ uri: apod?.url }}
+          />
         </TouchableWithoutFeedback>
       </View>
 
       {/* The date of the APOD image */}
       <View style={{ alignItems: "center", paddingBottom: 40 }}>
-        <Text style={styles.textDate}>{apod?.date}</Text>
+        <Text style={GalleryStyles.textDate}>{apod?.date}</Text>
       </View>
       <Toast />
     </View>

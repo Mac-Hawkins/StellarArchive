@@ -8,7 +8,27 @@ export default function RootLayout() {
     <Stack>
       {/* names need to match name of file. */}
       <Stack.Screen
-        name="index"
+        name="Login"
+        options={{
+          headerTitle: "Login",
+          headerTitleStyle: { fontSize: 24, fontWeight: "bold" },
+          headerTitleAlign: "center", // This centers the title
+          headerBackVisible: false, // Hides the back button on the index screen
+          headerStyle: { backgroundColor: "#acacc7" },
+        }}
+      />
+      <Stack.Screen
+        name="Register"
+        options={{
+          headerTitle: "Register",
+          headerTitleStyle: { fontSize: 24, fontWeight: "bold" },
+          headerTitleAlign: "center", // This centers the title
+          headerBackVisible: true, // Hides the back button on the index screen
+          headerStyle: { backgroundColor: "#acacc7" },
+        }}
+      />
+      <Stack.Screen
+        name="Gallery"
         options={{
           headerTitle: "Astronomy Picture of the Day",
           headerTitleStyle: { fontSize: 24, fontWeight: "bold" },

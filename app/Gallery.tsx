@@ -41,7 +41,7 @@ export const CARD_ANIMATION_DELAY = 2000; // Time to wait before new APOD swipes
 export const MAX_APOD_SKIPS = 5; // Number of tries to get the next or prev APOD if current one isn't an image.
 
 // Entry point of application. This is the first screen that users see when they open the app.
-export default function Index() {
+export default function Gallery() {
   // useEffect is a hook that allows us to fetch data.
   // useState is a hook that allows us to manage state in a state variable that we can then display.
 
