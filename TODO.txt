@@ -3,19 +3,19 @@ TODO
 Features
 
     Frontend
-        1. Allow screen to flip when phone is held landscape vs vertically.
-        2. Add loading text when waiting for an image to load.
-        3. Shrink the APOD, and APOD title when the explanation is brought up.
-        4. Make a sign in and create account screen
-        5. Add a start to the screen to allow users to favorite apods
-        6. Make a button in upper right or left to open and allow users to select a favorites tab to view to their favorite apods.
-        7. Add UI to add comments.
-        8. Make another option for users to see their comments.
-        9. There appears to be a bug now where it takes a while to load the first APOD or 2. This is after I added other screens.
+        - Add loading text when waiting for an image to load.
+        - Shrink the APOD, and APOD title when the explanation is brought up.
+        - Implement favorite, comments, and search functions.
+        - Add UI to add comments.
+        - Make another option for users to see their comments.
         
 
     Backend
-        1. Maybe change the created_at col in comments to a date datatype instead of timestamp.
-        2. Maybe clean up the lambda functions a bit.
+        - Maybe change the created_at col in comments to a date datatype instead of timestamp.
+        - Maybe clean up the lambda functions a bit.
 
-Bugs
+    Bugs
+        - It looks like I'm somehow triggering 2 calls for each APOD.
+        - There appears to be an issue with NASA's server for retrieving the APODs now. They did have a disclaimer about it before, but it worked fine then.
+        - Move the ApodFullScreenModal to the ApodCard so the user can only enlarge the image by clicking on it, not on the space between the image and title and date.
+            This would involve moving the onClose function to the ApodCard as a parameter, just like the onOpen one is currently.

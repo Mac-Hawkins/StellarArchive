@@ -1,7 +1,7 @@
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { Button, View } from "react-native";
+import { View } from "react-native";
 import { createCurrentDate } from "../utils/DateFormatting";
 
 // This component is for the UI of picking the date to go to.
@@ -18,13 +18,10 @@ interface DatePickerProps {
 export const DatePicker = ({
   showDatePicker,
   datePicked,
-  setShowDatePicker,
   onDatePicked,
 }: DatePickerProps) => {
   return (
     <View>
-      <Button title="Select a Date" onPress={setShowDatePicker} />
-
       {showDatePicker && (
         <DateTimePicker
           value={datePicked} // Update the value with the date that was actually picked.

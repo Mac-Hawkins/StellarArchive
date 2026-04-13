@@ -17,26 +17,9 @@ const loginRegisterStyles = StyleSheet.create({
     fontWeight: "bold",
   },
   linkRegister: { color: "blue", fontWeight: "bold", fontSize: 18 },
-  touchableOpacityLogin: {
-    height: 50,
-    width: 300,
-    backgroundColor: "lightblue",
-    borderRadius: 10,
-    justifyContent: "center", // Justifies text vertically within button.
-    alignItems: "center", // Justifies text horizontally within button.
-  },
   textRegister: { fontSize: 18, fontWeight: "bold", color: "blue" },
   viewTouchableOpacity: { alignItems: "center", marginTop: 50 },
   textTouchableOpacity: { fontSize: 18, fontWeight: "bold" },
-  touchableOpacityGuest: {
-    height: 50,
-    width: 300,
-    marginTop: 40,
-    backgroundColor: "lightgray",
-    borderRadius: 10,
-    justifyContent: "center", // Justifies text vertically within button.
-    alignItems: "center", // Justifies text horizontally within button.
-  },
 });
 
 export default loginRegisterStyles;

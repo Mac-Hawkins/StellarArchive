@@ -25,7 +25,7 @@ export const useApodStore = create<ApodStore>((set) => ({
   swipeDirection: null,
 
   // Function to set the current APOD date and swipe direction for a given date.
-  setApodDate: (date: string, direction: SwipeDirection) =>
+  setApodDate: (date: string, direction: SwipeDirection | null) =>
     set({ currentDate: date, swipeDirection: direction }),
 
   // The actions (functions to change the state of the BottomSheet)

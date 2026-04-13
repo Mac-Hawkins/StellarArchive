@@ -15,7 +15,7 @@ export const ApodCard = ({ apod, onOpen }: ApodCardProps) => {
   return (
     <View style={GalleryStyles.containerApodView}>
       {/* The title of the APOD image */}
-      <View style={{ alignItems: "center", paddingTop: 30 }}>
+      <View style={{ alignItems: "center", marginTop: 10 }}>
         <Text style={GalleryStyles.textApodTitle}>{apod?.title}</Text>
       </View>
 
@@ -30,7 +30,7 @@ export const ApodCard = ({ apod, onOpen }: ApodCardProps) => {
       </View>
 
       {/* The date of the APOD image */}
-      <View style={{ alignItems: "center", paddingBottom: 40 }}>
+      <View style={{ alignItems: "center" }}>
         <Text style={GalleryStyles.textDate}>{apod?.date}</Text>
       </View>
       <Toast />

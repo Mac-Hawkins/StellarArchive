@@ -3,11 +3,13 @@ import { ApodFullScreenModal } from "@/src/components/ApodFullScreenModal";
 import { DatePicker } from "@/src/components/DatePicker";
 import { ExplanationBottomSheet } from "@/src/components/ExplanationBottomSheet";
 import { ExplanationIndicator } from "@/src/components/ExplanationIndicator";
+import { AntDesign, Fontisto, Ionicons } from "@expo/vector-icons";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useIsFocused } from "@react-navigation/native";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { StatusBar } from "react-native";
+import { Pressable, StatusBar, Text, View } from "react-native";
 import {
   Directions,
   Gesture,
@@ -34,6 +36,7 @@ import {
   incrementDate,
 } from "../src/utils/DateFormatting";
 import { showToast } from "../src/utils/ToastMessages";
+import GalleryStyles from "./Gallery.styles";
 
 // Constants
 export const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3; // Swipe 30% of screen to trigger navigation.
@@ -52,12 +55,18 @@ export default function Gallery() {
   const [isFullScreen, setIsFullScreen] = useState(false); // State variable to track whether the APOD image is in full screen mode or not.
   const closeSheet = useApodStore((state) => state.closeSheet); // getter for close explanation sheet state var.
 
+  // Get params from URL. This is used to determine whether the user is logged in or not,
+  // which can then be used to conditionally render certain features
+  // (e.g., hiding the account icon and showing a toast message if they click on it that they need an account).
+  const params = useLocalSearchParams();
+  const isUserLoggedIn = params.userToken !== undefined; // If there is a userToken param, we can assume the user is logged in.
+
   // Refs
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   // Create hooks to swipe direction and current date in stored apod data.
   // Have to use this instead of getState() as that would just do a snapshot in time,
-  // and the app wouldn't know to runt he use state logic if the var changed.
+  // and the app wouldn't know to run the use state logic if the var changed.
   let swipeDirection = useApodStore((state) => state.swipeDirection); // getter
   let date = useApodStore((state) => state.currentDate); // getter
   const pastQueries = useApodStore((state) => state.pastQueries);
@@ -84,6 +93,18 @@ export default function Gallery() {
     }
     return () => StatusBar.setHidden(false);
   }, [isFullScreen]);
+
+  const onPressFavorite = (isUserLoggedIn: boolean) => {
+    if (!isUserLoggedIn) {
+      showToast("Please log in to favorite APODs!", ToastType.INFO, "center");
+    } else {
+      showToast(
+        "Favoriting APODs is not available yet!",
+        ToastType.INFO,
+        "center",
+      );
+    }
+  };
 
   // This function runs when a date is selected from the date picker element.
   const onDatePicked = (
@@ -140,7 +161,7 @@ export default function Gallery() {
     // Prevent users from swiping right to navigate to future APODs that haven't been released yet.
     // If the current APOD is today's date, return early and don't navigate to the next day.
     if (nextDay >= today) {
-      showToast("No APODs from the future!", ToastType.INFO); // Show a toast message to inform the user that they can't navigate to future APODs.
+      showToast("No APODs from the future!", ToastType.INFO, "center"); // Show a toast message to inform the user that they can't navigate to future APODs.
       return false;
     }
 
@@ -335,6 +356,7 @@ export default function Gallery() {
       showToast(
         "No able to retrieve image data! Please try again later.",
         ToastType.ERROR,
+        "center",
       );
     }
   };
@@ -343,13 +365,41 @@ export default function Gallery() {
   return (
     // GestureDetector must be wrapped by GestureHandlerRootView.
     <GestureHandlerRootView>
-      {/* The component for picking the date to go to. */}
-      <DatePicker
-        showDatePicker={showDatePicker}
-        datePicked={datePicked}
-        setShowDatePicker={() => setShowDatePicker(true)}
-        onDatePicked={onDatePicked}
-      />
+      <View style={GalleryStyles.pressableViewStyle}>
+        <Pressable onPress={() => router.push("./Login")}>
+          <Ionicons name="person-circle-outline" size={32} color="black" />
+          <Text style={GalleryStyles.pressableTextStyle}>Account</Text>
+        </Pressable>
+        {/* </Pressable> */}
+        <Pressable>
+          <Ionicons name="search-outline" size={32} color="black" />
+          <Text style={GalleryStyles.pressableTextStyle}>Search</Text>
+        </Pressable>
+        <Pressable onPress={() => setShowDatePicker(true)}>
+          <Fontisto name="date" size={32} color="black" />
+
+          {/* The component for picking the date to go to. */}
+          <DatePicker
+            showDatePicker={showDatePicker}
+            datePicked={datePicked}
+            setShowDatePicker={() => setShowDatePicker(true)}
+            onDatePicked={onDatePicked}
+          />
+          <Text style={GalleryStyles.pressableTextStyle}>Date</Text>
+        </Pressable>
+        <Pressable>
+          <AntDesign name="comment" size={32} color="black" />
+          <Text style={GalleryStyles.pressableTextStyle}>Comments</Text>
+        </Pressable>
+        <Pressable onPress={() => onPressFavorite(isUserLoggedIn)}>
+          <Ionicons
+            name="star-outline"
+            size={32}
+            color={!isUserLoggedIn ? "gray" : "black"}
+          />
+          <Text style={GalleryStyles.pressableTextStyle}>Favorite</Text>
+        </Pressable>
+      </View>
 
       {/* // Wrap in GestureDetector to handle swipe gestures for navigation between APODs. */}
       <GestureDetector gesture={gestures}>

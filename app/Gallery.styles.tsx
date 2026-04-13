@@ -10,6 +10,13 @@ const GalleryStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  pressableViewStyle: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 10,
+    backgroundColor: "lightgray",
+  },
+  pressableTextStyle: { fontSize: 8, fontWeight: "bold", textAlign: "center" },
   textApodTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -19,6 +26,8 @@ const GalleryStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 40,
+    marginBottom: 40,
   },
   imageApodNormal: {
     width: screenWidth * 0.9,
