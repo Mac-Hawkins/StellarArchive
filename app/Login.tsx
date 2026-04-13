@@ -73,48 +73,52 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={loginRegisterStyles.loginOuterView}>
-      <View style={loginRegisterStyles.inputView}>
-        <Text style={loginRegisterStyles.inputLabel}>Username</Text>
-        <TextInput
-          value={username}
-          onChangeText={setUsername}
-          style={loginRegisterStyles.textInput}
-          placeholder="Enter username"
-        />
-      </View>
-      <View style={loginRegisterStyles.inputView}>
-        <Text style={loginRegisterStyles.inputLabel}>Password</Text>
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          style={loginRegisterStyles.textInput}
-          placeholder="Enter password"
-          secureTextEntry={true}
-        />
-      </View>
-      <View style={loginRegisterStyles.inputView}>
-        <Text style={loginRegisterStyles.inputLabel}>No account?</Text>
-        <Link href="./Register" style={loginRegisterStyles.linkRegister}>
-          Register here.
-        </Link>
-      </View>
-      <View style={loginRegisterStyles.viewTouchableOpacity}>
-        <TouchableOpacity
-          disabled={disabled}
-          style={{
-            height: 50,
-            width: 300,
-            backgroundColor: "lightblue",
-            borderRadius: 10,
-            justifyContent: "center", // Justifies text vertically within button.
-            alignItems: "center", // Justifies text horizontally within button.
-            opacity: disabled ? 0.5 : 1, // Reduce opacity when disabled
-          }}
-          onPress={onPressLogin}
-        >
-          <Text style={loginRegisterStyles.textTouchableOpacity}>Login</Text>
-        </TouchableOpacity>
+    <View style={{ flex: 1, backgroundColor: "black" }}>
+      <View style={loginRegisterStyles.loginOuterView}>
+        <View style={loginRegisterStyles.inputView}>
+          <Text style={loginRegisterStyles.inputLabel}>Username</Text>
+          <TextInput
+            value={username}
+            onChangeText={setUsername}
+            style={loginRegisterStyles.textInput}
+            placeholder="Enter username"
+            placeholderTextColor="gray"
+          />
+        </View>
+        <View style={loginRegisterStyles.inputView}>
+          <Text style={loginRegisterStyles.inputLabel}>Password</Text>
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            style={loginRegisterStyles.textInput}
+            placeholder="Enter password"
+            placeholderTextColor="gray"
+            secureTextEntry={true}
+          />
+        </View>
+        <View style={loginRegisterStyles.inputView}>
+          <Text style={loginRegisterStyles.inputLabel}>No account?</Text>
+          <Link href="./Register" style={loginRegisterStyles.linkRegister}>
+            Register here.
+          </Link>
+        </View>
+        <View style={loginRegisterStyles.viewTouchableOpacity}>
+          <TouchableOpacity
+            disabled={disabled}
+            style={{
+              height: 50,
+              width: 300,
+              backgroundColor: "lightblue",
+              borderRadius: 10,
+              justifyContent: "center", // Justifies text vertically within button.
+              alignItems: "center", // Justifies text horizontally within button.
+              opacity: disabled ? 0.5 : 1, // Reduce opacity when disabled
+            }}
+            onPress={onPressLogin}
+          >
+            <Text style={loginRegisterStyles.textTouchableOpacity}>Login</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

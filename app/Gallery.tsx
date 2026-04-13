@@ -365,67 +365,72 @@ export default function Gallery() {
   return (
     // GestureDetector must be wrapped by GestureHandlerRootView.
     <GestureHandlerRootView>
-      <View style={GalleryStyles.pressableViewStyle}>
-        <Pressable onPress={() => router.push("./Login")}>
-          <Ionicons name="person-circle-outline" size={32} color="black" />
-          <Text style={GalleryStyles.pressableTextStyle}>Account</Text>
-        </Pressable>
-        {/* </Pressable> */}
-        <Pressable>
-          <Ionicons name="search-outline" size={32} color="black" />
-          <Text style={GalleryStyles.pressableTextStyle}>Search</Text>
-        </Pressable>
-        <Pressable onPress={() => setShowDatePicker(true)}>
-          <Fontisto name="date" size={32} color="black" />
+      <View style={{ flex: 1, backgroundColor: "black" }}>
+        <View style={GalleryStyles.pressableViewStyle}>
+          <Pressable onPress={() => router.push("./Login")}>
+            <Ionicons name="person-circle-outline" size={32} color="white" />
+            <Text style={GalleryStyles.pressableTextStyle}>Account</Text>
+          </Pressable>
+          {/* </Pressable> */}
+          <Pressable>
+            <Ionicons name="search-outline" size={32} color="white" />
+            <Text style={GalleryStyles.pressableTextStyle}>Search</Text>
+          </Pressable>
+          <Pressable onPress={() => setShowDatePicker(true)}>
+            <Fontisto name="date" size={32} color="white" />
 
-          {/* The component for picking the date to go to. */}
-          <DatePicker
-            showDatePicker={showDatePicker}
-            datePicked={datePicked}
-            setShowDatePicker={() => setShowDatePicker(true)}
-            onDatePicked={onDatePicked}
-          />
-          <Text style={GalleryStyles.pressableTextStyle}>Date</Text>
-        </Pressable>
-        <Pressable>
-          <AntDesign name="comment" size={32} color="black" />
-          <Text style={GalleryStyles.pressableTextStyle}>Comments</Text>
-        </Pressable>
-        <Pressable onPress={() => onPressFavorite(isUserLoggedIn)}>
-          <Ionicons
-            name="star-outline"
-            size={32}
-            color={!isUserLoggedIn ? "gray" : "black"}
-          />
-          <Text style={GalleryStyles.pressableTextStyle}>Favorite</Text>
-        </Pressable>
-      </View>
+            {/* The component for picking the date to go to. */}
+            <DatePicker
+              showDatePicker={showDatePicker}
+              datePicked={datePicked}
+              setShowDatePicker={() => setShowDatePicker(true)}
+              onDatePicked={onDatePicked}
+            />
+            <Text style={GalleryStyles.pressableTextStyle}>Date</Text>
+          </Pressable>
+          <Pressable>
+            <AntDesign name="comment" size={32} color="white" />
+            <Text style={GalleryStyles.pressableTextStyle}>Comments</Text>
+          </Pressable>
+          <Pressable onPress={() => onPressFavorite(isUserLoggedIn)}>
+            <Ionicons
+              name="star-outline"
+              size={32}
+              color={!isUserLoggedIn ? "gray" : "white"}
+            />
+            <Text style={GalleryStyles.pressableTextStyle}>Favorite</Text>
+          </Pressable>
+        </View>
 
-      {/* // Wrap in GestureDetector to handle swipe gestures for navigation between APODs. */}
-      <GestureDetector gesture={gestures}>
-        <Animated.View style={[{ flex: 1 }, animatedCardStyle]}>
-          {/* The component for the APOD title, image, and date. */}
-          <ApodCard apod={apod} onOpen={() => setIsFullScreen(true)}></ApodCard>
+        {/* // Wrap in GestureDetector to handle swipe gestures for navigation between APODs. */}
+        <GestureDetector gesture={gestures}>
+          <Animated.View style={[{ flex: 1 }, animatedCardStyle]}>
+            {/* The component for the APOD title, image, and date. */}
+            <ApodCard
+              apod={apod}
+              onOpen={() => setIsFullScreen(true)}
+            ></ApodCard>
+          </Animated.View>
+        </GestureDetector>
+
+        {/* Modal to display the APOD image in full screen when the user taps on it. */}
+        <ApodFullScreenModal
+          apod={apod}
+          isFullScreen={isFullScreen}
+          onClose={() => setIsFullScreen(false)}
+        ></ApodFullScreenModal>
+
+        <Animated.View style={{ transform: [{ translateY }] }}>
+          <ExplanationIndicator />
         </Animated.View>
-      </GestureDetector>
 
-      {/* Modal to display the APOD image in full screen when the user taps on it. */}
-      <ApodFullScreenModal
-        apod={apod}
-        isFullScreen={isFullScreen}
-        onClose={() => setIsFullScreen(false)}
-      ></ApodFullScreenModal>
-
-      <Animated.View style={{ transform: [{ translateY }] }}>
-        <ExplanationIndicator />
-      </Animated.View>
-
-      {/* The component for the APOD explanation, which can be dragged up from bottom. */}
-      <ExplanationBottomSheet
-        apod={apod}
-        bottomSheetRef={bottomSheetRef}
-        onCloseSheet={closeSheet}
-      ></ExplanationBottomSheet>
+        {/* The component for the APOD explanation, which can be dragged up from bottom. */}
+        <ExplanationBottomSheet
+          apod={apod}
+          bottomSheetRef={bottomSheetRef}
+          onCloseSheet={closeSheet}
+        ></ExplanationBottomSheet>
+      </View>
     </GestureHandlerRootView>
   );
 }

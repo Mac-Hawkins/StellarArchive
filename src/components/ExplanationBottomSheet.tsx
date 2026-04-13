@@ -25,9 +25,10 @@ export const ExplanationBottomSheet = ({
       enablePanDownToClose={true} // Allows swiping away the bottom sheet by swiping down.
       snapPoints={["25%", "80%"]}
       onClose={onCloseSheet}
+      style={{ backgroundColor: "black" }}
     >
       {/* When the bottom sheet is closed, call the closeSheet function to update the state in ApodStore.*/}
-      <BottomSheetScrollView>
+      <BottomSheetScrollView style={{ backgroundColor: "black" }}>
         {/* Header */}
         <View>
           <Text style={GalleryStyles.textExplanationTitle}>Explanation</Text>

@@ -7,7 +7,7 @@ const loginRegisterStyles = StyleSheet.create({
     flexDirection: "column",
     marginTop: 30,
   },
-  inputLabel: { fontSize: 18, fontWeight: "bold" },
+  inputLabel: { fontSize: 18, fontWeight: "bold", color: "white" },
   textInput: {
     borderWidth: 1,
     borderColor: "gray",

@@ -84,55 +84,64 @@ export default function LoginScreen() {
   // Rendering
 
   return (
-    <View style={loginRegisterStyles.loginOuterView}>
-      <View style={loginRegisterStyles.inputView}>
-        <Text style={loginRegisterStyles.inputLabel}>Username</Text>
-        <TextInput
-          style={loginRegisterStyles.textInput}
-          placeholder="Enter username"
-          value={username}
-          onChangeText={setUsername}
-        />
-      </View>
-      <View style={loginRegisterStyles.inputView}>
-        <Text style={loginRegisterStyles.inputLabel}>New Password</Text>
-        <TextInput
-          style={loginRegisterStyles.textInput}
-          placeholder="Enter new password"
-          secureTextEntry={true}
-          value={password}
-          onChangeText={setPassword}
-        />
-      </View>
-      <View style={loginRegisterStyles.inputView}>
-        <Text style={loginRegisterStyles.inputLabel}>Confirm New Password</Text>
-        <TextInput
-          style={loginRegisterStyles.textInput}
-          placeholder="Confirm new password"
-          secureTextEntry={true}
-          value={confirmedPassword}
-          onChangeText={setConfirmedPassword}
-        />
-      </View>
+    <View style={{ flex: 1, backgroundColor: "black" }}>
+      <View style={loginRegisterStyles.loginOuterView}>
+        <View style={loginRegisterStyles.inputView}>
+          <Text style={loginRegisterStyles.inputLabel}>Username</Text>
+          <TextInput
+            style={loginRegisterStyles.textInput}
+            placeholder="Enter username"
+            placeholderTextColor="gray"
+            value={username}
+            onChangeText={setUsername}
+          />
+        </View>
+        <View style={loginRegisterStyles.inputView}>
+          <Text style={loginRegisterStyles.inputLabel}>New Password</Text>
+          <TextInput
+            style={loginRegisterStyles.textInput}
+            placeholder="Enter new password"
+            placeholderTextColor="gray"
+            secureTextEntry={true}
+            value={password}
+            onChangeText={setPassword}
+          />
+        </View>
+        <View style={loginRegisterStyles.inputView}>
+          <Text style={loginRegisterStyles.inputLabel}>
+            Confirm New Password
+          </Text>
+          <TextInput
+            style={loginRegisterStyles.textInput}
+            placeholder="Confirm new password"
+            placeholderTextColor="gray"
+            secureTextEntry={true}
+            value={confirmedPassword}
+            onChangeText={setConfirmedPassword}
+          />
+        </View>
 
-      <View style={loginRegisterStyles.viewTouchableOpacity}>
-        <TouchableOpacity
-          disabled={disabled}
-          style={{
-            height: 50,
-            width: 300,
-            backgroundColor: "lightblue",
-            borderRadius: 10,
-            justifyContent: "center", // Justifies text vertically within button.
-            alignItems: "center", // Justifies text horizontally within button.
-            opacity: disabled ? 0.5 : 1, // Reduce opacity when disabled
-          }}
-          onPress={() => {
-            onPressRegister();
-          }}
-        >
-          <Text style={loginRegisterStyles.textTouchableOpacity}>Register</Text>
-        </TouchableOpacity>
+        <View style={loginRegisterStyles.viewTouchableOpacity}>
+          <TouchableOpacity
+            disabled={disabled}
+            style={{
+              height: 50,
+              width: 300,
+              backgroundColor: "lightblue",
+              borderRadius: 10,
+              justifyContent: "center", // Justifies text vertically within button.
+              alignItems: "center", // Justifies text horizontally within button.
+              opacity: disabled ? 0.5 : 1, // Reduce opacity when disabled
+            }}
+            onPress={() => {
+              onPressRegister();
+            }}
+          >
+            <Text style={loginRegisterStyles.textTouchableOpacity}>
+              Register
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

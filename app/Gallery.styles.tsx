@@ -14,13 +14,19 @@ const GalleryStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 10,
-    backgroundColor: "lightgray",
+    backgroundColor: "black",
   },
-  pressableTextStyle: { fontSize: 8, fontWeight: "bold", textAlign: "center" },
+  pressableTextStyle: {
+    fontSize: 8,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "white",
+  },
   textApodTitle: {
     fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
+    color: "white",
   },
   containerImgView: {
     flex: 1,
@@ -39,6 +45,7 @@ const GalleryStyles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     width: "100%",
+    color: "white",
   },
   viewImageFull: {
     flex: 1,
@@ -59,16 +66,18 @@ const GalleryStyles = StyleSheet.create({
     marginBottom: 0,
   },
   textExplanationTitle: {
-    backgroundColor: "#1a181820",
+    backgroundColor: "black",
     borderRadius: 20,
     fontSize: 24,
     margin: 20,
     textAlign: "center",
     fontWeight: "bold",
+    color: "white",
   },
   textExplanation: {
     fontSize: 18,
     margin: 20,
+    color: "white",
   },
 });
 
