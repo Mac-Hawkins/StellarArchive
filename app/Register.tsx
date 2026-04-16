@@ -10,7 +10,6 @@ import React, { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import loginRegisterStyles from "./LoginRegister.styles";
 
-// Entry point of application. This is the first screen that users see when they open the app.
 export default function LoginScreen() {
   const router = useRouter();
 

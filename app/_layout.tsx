@@ -42,6 +42,16 @@ export default function RootLayout() {
               headerStyle: { backgroundColor: "#acacc7" },
             }}
           />
+          <Stack.Screen
+            name="UserHome"
+            options={{
+              headerTitle: "User Home",
+              headerTitleStyle: { fontSize: 24, fontWeight: "bold" },
+              headerTitleAlign: "center", // This centers the title
+              headerBackVisible: false, // Hides the back button on the index screen
+              headerStyle: { backgroundColor: "#acacc7" },
+            }}
+          />
         </Stack>
       </View>
       {/* Toast component for showing toast messages across the app. */}

@@ -11,7 +11,6 @@ import {
 import { showToast } from "../src/utils/ToastMessages";
 import loginRegisterStyles from "./LoginRegister.styles";
 
-// Entry point of application. This is the first screen that users see when they open the app.
 export default function LoginScreen() {
   const router = useRouter();
 
@@ -54,10 +53,9 @@ export default function LoginScreen() {
         showToast("Login successful!", ToastType.SUCCESS, "center");
         const token = data.token; // Store token for future authenticated requests
         router.push({
-          pathname: "./Gallery",
+          pathname: "./UserHome",
           params: { userToken: token },
         });
-        //router.push("./UserHome"); // Eventually go to this instead.
       } else {
         showToast(
           "Login failed. User doesn't match our records.",

@@ -15,6 +15,7 @@ const loginRegisterStyles = StyleSheet.create({
     padding: 10,
     fontSize: 18,
     fontWeight: "bold",
+    color: "white",
   },
   linkRegister: { color: "blue", fontWeight: "bold", fontSize: 18 },
   textRegister: { fontSize: 18, fontWeight: "bold", color: "blue" },

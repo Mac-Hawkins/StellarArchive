@@ -94,6 +94,17 @@ export default function Gallery() {
     return () => StatusBar.setHidden(false);
   }, [isFullScreen]);
 
+  const onPressAccount = (isUserLoggedIn: boolean) => {
+    if (!isUserLoggedIn) {
+      router.push("./Login");
+    } else {
+      router.push({
+        pathname: "./UserHome",
+        params: { userToken: params.userToken },
+      });
+    }
+  };
+
   const onPressFavorite = (isUserLoggedIn: boolean) => {
     if (!isUserLoggedIn) {
       showToast("Please log in to favorite APODs!", ToastType.INFO, "center");
@@ -365,9 +376,10 @@ export default function Gallery() {
   return (
     // GestureDetector must be wrapped by GestureHandlerRootView.
     <GestureHandlerRootView>
+      {/* Makes the entire screen black, including the area behind the status bar. */}
       <View style={{ flex: 1, backgroundColor: "black" }}>
         <View style={GalleryStyles.pressableViewStyle}>
-          <Pressable onPress={() => router.push("./Login")}>
+          <Pressable onPress={() => onPressAccount(isUserLoggedIn)}>
             <Ionicons name="person-circle-outline" size={32} color="white" />
             <Text style={GalleryStyles.pressableTextStyle}>Account</Text>
           </Pressable>
