@@ -24,7 +24,13 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { API_KEY, SCREEN_WIDTH } from "../src/constants/config";
+import {
+  API_KEY,
+  AWS_APODS_ENDPOINT,
+  AWS_AUTHORIZATION,
+  AWS_BASE_URL,
+  SCREEN_WIDTH,
+} from "../src/constants/config";
 import { useApodStore } from "../src/store/ApodStore";
 import { SwipeDirection } from "../src/types/enums/SwipeDirection";
 import { ToastType } from "../src/types/enums/ToastType";
@@ -311,21 +317,91 @@ export default function Gallery() {
     );
   }, []); // Only start when the component originally mounts.
 
-  const fetchApods = async () => {
+  const fetchApodsFromBackendOrNasa = async (date: string) => {
+    let data = null;
     try {
-      // Get the APOD based on the date passed as a parameter in the URL. If no date is passed, default to today's APOD.
-      const response = await fetch(
-        `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${date}`,
+      let apodWasFetchedFromBackend = false; // Flag to track if we successfully fetched the APOD from the backend cache.
+
+      // Try getting the APOD first from the backend to see if we have it cached there from a previous fetch. If not, then fetch from the NASA API.
+      let apodResponse = await fetch(
+        AWS_BASE_URL + `${AWS_APODS_ENDPOINT}` + `/${date}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${AWS_AUTHORIZATION}`,
+          },
+        },
       );
 
-      // Should retrieve the APOD in JSON.
-      let data = await response.json();
+      if (!apodResponse.ok) {
+        console.log("APOD not found in backend cache, fetching from NASA API.");
+        // Get the APOD based on the date passed as a parameter in the URL. If no date is passed, default to today's APOD.
+        apodResponse = await fetch(
+          `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${date}`,
+        );
+      } else {
+        apodWasFetchedFromBackend = true;
+      }
 
-      // Make a loop to skiip any APODs that aren't images (e.g., videos) and fetch the next one until we find an
+      // Should retrieve the APOD in JSON.
+      data = await apodResponse.json();
+
+      // If we successfully fetched the APOD from the NASA API (i.e., it wasn't cached on the backend),
+      // then cache it on the backend for future use.
+      if (!apodWasFetchedFromBackend) {
+        let { title, url, explanation } = data;
+        let image_url = url; // Rename url to image_url for clarity when caching on the backend.
+        data["image_url"] = url; // Add image_url field to the data object for caching on the backend.
+        // Cache the APOD on the backend.
+        await fetch(AWS_BASE_URL + `${AWS_APODS_ENDPOINT}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${AWS_AUTHORIZATION}`,
+          },
+          body: JSON.stringify({
+            date,
+            title,
+            image_url,
+            explanation,
+          }),
+        });
+      } else {
+        data = data.message[0];
+        const dateOnly = data.date.slice(0, 10);
+        data.date = dateOnly; // Format the date to only include the date portion (YYYY-MM-DD) for consistency and display purposes.
+      }
+    } catch (error) {
+      translateX.value = 0;
+      console.error("Error fetching data");
+      showToast(
+        "Not able to retrieve image data! Please try again later.",
+        ToastType.ERROR,
+        "center",
+      );
+    }
+    return data;
+  };
+
+  const fetchApods = async () => {
+    let data: any = await fetchApodsFromBackendOrNasa(date);
+
+    try {
+      // Make a loop to skip any APODs that aren't images (e.g., videos) and fetch the next one until we find an
       // image or reach a maximum number of tries to avoid infinite loops in case of unexpected API behavior.
       let i = 0;
-      while (data.media_type !== "image" && i < MAX_APOD_SKIPS) {
+      while (
+        data["image_url"].includes(".jpg") === false &&
+        i < MAX_APOD_SKIPS
+      ) {
+        showToast(
+          "Media type is not an image, skipping to the next one.",
+          ToastType.INFO,
+          "center",
+        );
         console.log("Media type is not an image, skipping ahead.");
+        console.log("swipeDirection:", swipeDirection);
 
         // If the user was navigating to the next day,
         // keep going forward one day until we find an image.
@@ -335,16 +411,9 @@ export default function Gallery() {
             ? incrementDate(date)
             : decrementDate(date);
 
-        // Fetch the APOD with the new date.
-        const nextResponse = await fetch(
-          `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${date}`,
-        );
-        data = await nextResponse.json();
+        data = await fetchApodsFromBackendOrNasa(date);
         i++;
       }
-
-      // Debug log for testing purposes.
-      console.log("fetchApods", data);
 
       // 1. Instantly move the card to the OTHER side (invisible)
       // If they swiped Right, we want the new card to slide in from the Left
@@ -363,12 +432,7 @@ export default function Gallery() {
       setDate(date, swipeDirection); // Update the current date and swipe direction in ApodStore so that the next screen can fetch the correct APOD based on the date and direction.
     } catch (error) {
       translateX.value = 0;
-      console.error("Error fetching data:", error);
-      showToast(
-        "No able to retrieve image data! Please try again later.",
-        ToastType.ERROR,
-        "center",
-      );
+      console.error("Error in processing APODs.");
     }
   };
 

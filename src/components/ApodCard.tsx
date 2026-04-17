@@ -24,7 +24,7 @@ export const ApodCard = ({ apod, onOpen }: ApodCardProps) => {
         <TouchableWithoutFeedback onPress={onOpen}>
           <Image
             style={GalleryStyles.imageApodNormal}
-            source={{ uri: apod?.url }}
+            source={{ uri: apod?.image_url }}
           />
         </TouchableWithoutFeedback>
       </View>

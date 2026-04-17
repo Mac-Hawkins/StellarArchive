@@ -19,7 +19,10 @@ export const ApodFullScreenModal = ({
     <Modal visible={isFullScreen} statusBarTranslucent={true}>
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={GalleryStyles.viewImageFull}>
-          <Image style={GalleryStyles.imageFull} source={{ uri: apod?.url }} />
+          <Image
+            style={GalleryStyles.imageFull}
+            source={{ uri: apod?.image_url }}
+          />
         </View>
       </TouchableWithoutFeedback>
     </Modal>
