@@ -8,6 +8,7 @@ Features
         - Implement favorite, comments, and search functions.
         - Add UI to add comments.
         - Make another option for users to see their comments.
+        - Return the apod id from backend on POST request.
         
 
     Backend
@@ -17,5 +18,6 @@ Features
     Bugs
         - It looks like I'm somehow triggering 2 calls for each APOD.
         - There appears to be an issue with NASA's server for retrieving the APODs now. They did have a disclaimer about it before, but it worked fine then.
+            - I'm working around this by storing each apod retrieved in my database and attempting to retrieve it from there first.
         - Move the ApodFullScreenModal to the ApodCard so the user can only enlarge the image by clicking on it, not on the space between the image and title and date.
             This would involve moving the onClose function to the ApodCard as a parameter, just like the onOpen one is currently.

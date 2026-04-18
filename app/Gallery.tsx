@@ -3,7 +3,7 @@ import { ApodFullScreenModal } from "@/src/components/ApodFullScreenModal";
 import { DatePicker } from "@/src/components/DatePicker";
 import { ExplanationBottomSheet } from "@/src/components/ExplanationBottomSheet";
 import { ExplanationIndicator } from "@/src/components/ExplanationIndicator";
-import { AntDesign, Fontisto, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Feather, Fontisto, Ionicons } from "@expo/vector-icons";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useIsFocused } from "@react-navigation/native";
@@ -29,6 +29,8 @@ import {
   AWS_APODS_ENDPOINT,
   AWS_AUTHORIZATION,
   AWS_BASE_URL,
+  AWS_FAVORITES_ENDPOINT,
+  AWS_USERS_ENDPOINT,
   SCREEN_WIDTH,
 } from "../src/constants/config";
 import { useApodStore } from "../src/store/ApodStore";
@@ -51,6 +53,11 @@ export const MAX_APOD_SKIPS = 5; // Number of tries to get the next or prev APOD
 
 // Entry point of application. This is the first screen that users see when they open the app.
 export default function Gallery() {
+  // Get params from URL. This is used to determine whether the user is logged in or not,
+  // which can then be used to conditionally render certain features
+  // (e.g., hiding the account icon and showing a toast message if they click on it that they need an account).
+  const params = useLocalSearchParams();
+
   // useEffect is a hook that allows us to fetch data.
   // useState is a hook that allows us to manage state in a state variable that we can then display.
 
@@ -60,12 +67,22 @@ export default function Gallery() {
   const [datePicked, setDatePicked] = useState(new Date()); // State variable to store the date selected from the date picker. Defaults to current date.
   const [isFullScreen, setIsFullScreen] = useState(false); // State variable to track whether the APOD image is in full screen mode or not.
   const closeSheet = useApodStore((state) => state.closeSheet); // getter for close explanation sheet state var.
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(
+    params.userId !== undefined,
+  );
+  const [isApodFavorited, setIsApodFavorited] = useState(false); // Needs to be a state variable so that the component re-renders when the user favorites or un-favorites an APOD to update the color of the star icon.
+  const [favoriteId, setFavoriteId] = useState<number | null>(null); // Store the id of the favorite entry for this APOD so we can delete it if the user un-favorites the APOD.
+  const [userFavorites, setUserFavorites] = useState<{
+    [apodId: number]: number;
+  }>({}); // Map of apod_id => favorite_id for quick lookups without API calls
+  //const [iconFavoriteColor, setIconFavoriteColor] = useState("white"); // State variable to control the color of the favorite icon based on whether the APOD is favorited or not. I don't think I need this.
 
-  // Get params from URL. This is used to determine whether the user is logged in or not,
-  // which can then be used to conditionally render certain features
-  // (e.g., hiding the account icon and showing a toast message if they click on it that they need an account).
-  const params = useLocalSearchParams();
-  const isUserLoggedIn = params.userToken !== undefined; // If there is a userToken param, we can assume the user is logged in.
+  // Determine the color of the favorite icon based on whether the user is logged in and whether the APOD is favorited or not.
+  let iconFavoriteColor = !isUserLoggedIn
+    ? "gray"
+    : isApodFavorited
+      ? "yellow"
+      : "white"; // If the user is logged in and the APOD is favorited, show a yellow star. If the user is logged in but the APOD isn't favorited, show a white star. If the user isn't logged in, show a gray star to indicate that they need to log in to favorite APODs.
 
   // Refs
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -85,8 +102,6 @@ export default function Gallery() {
   // This is used to determine how far the user has swiped left or right,
   // which can be used to trigger navigation between APODs when a certain threshold is reached.
   const translateX = useSharedValue(0);
-
-  //
   const translateY = useSharedValue(0);
 
   // Hides the status/natification bar to when the image is enlarged make it more immersive.
@@ -100,26 +115,111 @@ export default function Gallery() {
     return () => StatusBar.setHidden(false);
   }, [isFullScreen]);
 
+  // Update isUserLoggedIn when params change (e.g., when user logs in/out)
+  useEffect(() => {
+    setIsUserLoggedIn(params.userId !== undefined);
+  }, [params.userId]);
+
+  // Fetch user's favorites list once when they log in to avoid repeated API calls
+  useEffect(() => {
+    if (isUserLoggedIn) {
+      fetchUserFavoritesMap();
+    } else {
+      setUserFavorites({}); // Clear favorites if user logs out
+    }
+  }, [isUserLoggedIn]);
+
+  // Update favorite status whenever apod or userFavorites changes
+  useEffect(() => {
+    if (apod) {
+      const apodId = apod.id;
+      const isFavorited = apodId in userFavorites;
+      setIsApodFavorited(isFavorited);
+      setFavoriteId(isFavorited ? userFavorites[apodId] : null);
+    }
+  }, [apod, userFavorites]);
+
   const onPressAccount = (isUserLoggedIn: boolean) => {
     if (!isUserLoggedIn) {
       router.push("./Login");
     } else {
       router.push({
         pathname: "./UserHome",
-        params: { userToken: params.userToken },
+        params: { userToken: params.userToken, userId: params.userId },
       });
     }
   };
 
-  const onPressFavorite = (isUserLoggedIn: boolean) => {
+  const onPressFavorite = async (isUserLoggedIn: boolean) => {
     if (!isUserLoggedIn) {
       showToast("Please log in to favorite APODs!", ToastType.INFO, "center");
-    } else {
-      showToast(
-        "Favoriting APODs is not available yet!",
-        ToastType.INFO,
-        "center",
+    } else if (isApodFavorited) {
+      const deleteFavoriteResp = await fetch(
+        AWS_BASE_URL +
+          `${AWS_USERS_ENDPOINT}/${params.userId}${AWS_FAVORITES_ENDPOINT}/${favoriteId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${params.userToken}`,
+          },
+        },
       );
+
+      if (!deleteFavoriteResp.ok) {
+        showToast(
+          "Error un-favoriting APOD. Please try again later.",
+          ToastType.ERROR,
+          "center",
+        );
+      } else {
+        showToast(
+          "APOD un-favorited successfully!",
+          ToastType.SUCCESS,
+          "center",
+        );
+        // Remove from cached favorites
+        const newFavorites = { ...userFavorites };
+        delete newFavorites[apod?.id ?? -1];
+        setUserFavorites(newFavorites);
+        console.log(
+          "APOD un-favorited successfully, removed from favorites cache.",
+        );
+      }
+    } else {
+      const apod_id = apod?.id.toString();
+
+      const postFavoriteResp = await fetch(
+        AWS_BASE_URL +
+          `${AWS_USERS_ENDPOINT}/${params.userId}${AWS_FAVORITES_ENDPOINT}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${params.userToken}`,
+          },
+          body: JSON.stringify({
+            apod_id,
+          }),
+        },
+      );
+
+      if (!postFavoriteResp.ok) {
+        showToast(
+          "Error favoriting APOD. Please try again later.",
+          ToastType.ERROR,
+          "center",
+        );
+      } else {
+        showToast("APOD favorited successfully!", ToastType.SUCCESS, "center");
+        const data = await postFavoriteResp.json();
+        // Add to cached favorites
+        setUserFavorites({
+          ...userFavorites,
+          [apod?.id ?? -1]: data.favorite_id,
+        });
+        console.log("favorite added to cache.");
+      }
     }
   };
 
@@ -367,6 +467,23 @@ export default function Gallery() {
             explanation,
           }),
         });
+
+        // Retrieve the APOD again from the backend to get the id added by the backend,
+        // and to ensure consistency in the data structure we are using throughout the app.
+        // TODO: We could optimize this by having the backend return the cached APOD data in the response when we cache it, so we don't have to make a second fetch request to get the same data right after caching it.
+        apodResponse = await fetch(
+          AWS_BASE_URL + `${AWS_APODS_ENDPOINT}` + `/${date}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${AWS_AUTHORIZATION}`,
+            },
+          },
+        );
+
+        // Should retrieve the APOD in JSON.
+        data = await apodResponse.json();
       } else {
         data = data.message[0];
         const dateOnly = data.date.slice(0, 10);
@@ -382,6 +499,43 @@ export default function Gallery() {
       );
     }
     return data;
+  };
+
+  // Fetch all user favorites once and build a map for O(1) lookup
+
+  const fetchUserFavoritesMap = async () => {
+    try {
+      const getFavoriteResp = await fetch(
+        AWS_BASE_URL +
+          `${AWS_USERS_ENDPOINT}/${params.userId}${AWS_FAVORITES_ENDPOINT}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${params.userToken}`,
+          },
+        },
+      );
+
+      const data = await getFavoriteResp.json();
+
+      // Parse the favorites data and build a map of apod_id => favorite_id
+      const favoritesMap: { [apodId: number]: number } = {};
+      if (data.message) {
+        try {
+          // Loop through the favorites data and populate the favoritesMap with apod_id as the key and favorite_id as the value for O(1) lookups later when determining if an APOD is favorited.
+          data.message.forEach((fav: { apod_id: number; id: number }) => {
+            favoritesMap[fav.apod_id] = fav.id;
+          });
+        } catch (e) {
+          console.error("Error parsing favorites data.");
+        }
+      }
+
+      setUserFavorites(favoritesMap);
+    } catch (error) {
+      console.error("Error fetching user favorites.");
+    }
   };
 
   const fetchApods = async () => {
@@ -422,6 +576,7 @@ export default function Gallery() {
 
       // 2. Set the new image data
       // Update the state variable with the fetched APOD data.
+      console.log("Fetched APOD data:", data);
       setApod(data);
 
       // 3. Smoothly slide the new card into the center
@@ -469,12 +624,10 @@ export default function Gallery() {
             <Text style={GalleryStyles.pressableTextStyle}>Comments</Text>
           </Pressable>
           <Pressable onPress={() => onPressFavorite(isUserLoggedIn)}>
-            <Ionicons
-              name="star-outline"
-              size={32}
-              color={!isUserLoggedIn ? "gray" : "white"}
-            />
-            <Text style={GalleryStyles.pressableTextStyle}>Favorite</Text>
+            <Feather name="star" size={32} color={iconFavoriteColor} />
+            <Text style={GalleryStyles.pressableTextStyle}>
+              {isApodFavorited ? "Unfavorite" : "Favorite"}
+            </Text>
           </Pressable>
         </View>
 

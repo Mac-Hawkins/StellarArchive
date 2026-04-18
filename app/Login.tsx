@@ -1,6 +1,7 @@
 import { ToastType } from "@/src/types/enums/ToastType";
 import { fetch } from "cross-fetch"; // or use 'node-fetch' or the native fetch in RN 0.64+
 import { Link, useRouter } from "expo-router";
+import { jwtDecode } from "jwt-decode";
 import React, { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import {
@@ -51,10 +52,13 @@ export default function LoginScreen() {
       const data = await response.json();
       if (data.message.includes("Login successful")) {
         showToast("Login successful!", ToastType.SUCCESS, "center");
-        const token = data.token; // Store token for future authenticated requests
+        // Get token and user ID from response, then navigate to UserHome screen with token as param.
+        const token = data.token;
+        const decoded: any = jwtDecode(token);
+        const userId = decoded.userId;
         router.push({
           pathname: "./UserHome",
-          params: { userToken: token },
+          params: { userToken: token, userId: userId },
         });
       } else {
         showToast(

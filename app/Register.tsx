@@ -6,6 +6,7 @@ import {
 import { ToastType } from "@/src/types/enums/ToastType";
 import { showToast } from "@/src/utils/ToastMessages";
 import { useRouter } from "expo-router";
+import { jwtDecode } from "jwt-decode";
 import React, { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import loginRegisterStyles from "./LoginRegister.styles";
@@ -63,13 +64,14 @@ export default function LoginScreen() {
 
       const data = await response.json();
       if (data.message.includes("User created")) {
-        alert("Register successful! Please login with your new credentials.");
-        const token = data.token; // Store token for future authenticated requests
+        alert("Register successful!.");
+        const token = data.token;
+        const decoded: any = jwtDecode(token);
+        const userId = decoded.userId;
         router.push({
-          pathname: "./Login",
-          params: { userToken: token },
+          pathname: "./UserHome",
+          params: { userToken: token, userId: userId },
         });
-        //router.push("./UserHome"); // Eventually go to this instead.
       } else {
         showToast("Register failed.", ToastType.ERROR, "center");
       }

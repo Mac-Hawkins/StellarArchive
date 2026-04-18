@@ -6,7 +6,6 @@ import UserHomeStyles from "./UserHome.styles";
 // Entry point of application. This is the first screen that users see when they open the app.
 export default function LoginScreen() {
   const params = useLocalSearchParams();
-  const isUserLoggedIn = params.userToken !== undefined; // If there is a userToken param, we can assume the user is logged in.
 
   const onPressSignOut = () => {
     Alert.alert(
@@ -24,7 +23,7 @@ export default function LoginScreen() {
             // Just return to Gallery with no user token.
             router.push({
               pathname: "./Gallery",
-              params: { userToken: undefined },
+              params: { userId: undefined },
             }),
         },
       ],
@@ -35,7 +34,7 @@ export default function LoginScreen() {
     // Pass the user token just to be safe.
     router.push({
       pathname: "./Gallery",
-      params: { userToken: params.userToken },
+      params: { userToken: params.userToken, userId: params.userId },
     });
   };
 
