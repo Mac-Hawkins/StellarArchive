@@ -454,36 +454,36 @@ export default function Gallery() {
         let image_url = url; // Rename url to image_url for clarity when caching on the backend.
         data["image_url"] = url; // Add image_url field to the data object for caching on the backend.
         // Cache the APOD on the backend.
-        await fetch(AWS_BASE_URL + `${AWS_APODS_ENDPOINT}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `${AWS_AUTHORIZATION}`,
-          },
-          body: JSON.stringify({
-            date,
-            title,
-            image_url,
-            explanation,
-          }),
-        });
-
-        // Retrieve the APOD again from the backend to get the id added by the backend,
-        // and to ensure consistency in the data structure we are using throughout the app.
-        // TODO: We could optimize this by having the backend return the cached APOD data in the response when we cache it, so we don't have to make a second fetch request to get the same data right after caching it.
-        apodResponse = await fetch(
-          AWS_BASE_URL + `${AWS_APODS_ENDPOINT}` + `/${date}`,
+        const postApodResponse = await fetch(
+          AWS_BASE_URL + `${AWS_APODS_ENDPOINT}`,
           {
-            method: "GET",
+            method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: `${AWS_AUTHORIZATION}`,
             },
+            body: JSON.stringify({
+              date,
+              title,
+              image_url,
+              explanation,
+            }),
           },
         );
 
-        // Should retrieve the APOD in JSON.
-        data = await apodResponse.json();
+        // Retrieve the APOD again from the backend to get the id added by the backend,
+        // and to ensure consistency in the data structure we are using throughout the app.
+        // TODO: We could optimize this by having the backend return the cached APOD data in the response when we cache it, so we don't have to make a second fetch request to get the same data right after caching it.
+        if (!postApodResponse.ok) {
+          console.error("Error caching APOD on backend.");
+        } else {
+          // Add the id from the backend to the data object so we can use it for favoriting and other operations that require the APOD id.
+          const temp = await postApodResponse.json();
+          data["id"] = temp.id;
+          data["title"] = title;
+          data["explanation"] = explanation;
+          data["image_url"] = image_url;
+        }
       } else {
         data = data.message[0];
         const dateOnly = data.date.slice(0, 10);
@@ -550,11 +550,11 @@ export default function Gallery() {
         i < MAX_APOD_SKIPS
       ) {
         showToast(
-          "Media type is not an image, skipping to the next one.",
+          "Media type was not an image, skipping to the next one.",
           ToastType.INFO,
           "center",
         );
-        console.log("Media type is not an image, skipping ahead.");
+        console.log("Media type was not an image, skipping ahead.");
         console.log("swipeDirection:", swipeDirection);
 
         // If the user was navigating to the next day,
