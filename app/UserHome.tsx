@@ -1,13 +1,113 @@
+import {
+  AWS_BASE_URL,
+  AWS_FAVORITES_ENDPOINT,
+  AWS_USERS_ENDPOINT,
+} from "@/src/constants/config";
 import { AntDesign, Entypo, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { Alert, Pressable, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import UserHomeStyles from "./UserHome.styles";
 
 // Entry point of application. This is the first screen that users see when they open the app.
 export default function LoginScreen() {
   const params = useLocalSearchParams();
 
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(
+    params.userId !== undefined, // If we got to this screen then this should definitely be true.
+  );
+
+  // useStates to track which tab is selected in the user home screen.
+  // Only one can be selected at a time, and the selected tab will be highlighted in the UI.
+  const [favoritesTabSelected, setFavoritesTabSelected] = useState(false);
+  const [commentsTabSelected, setCommentsTabSelected] = useState(false);
+  const [backToGalleryTabSelected, setBackToGalleryTabSelected] =
+    useState(false);
+  const [signOutTabSelected, setSignOutTabSelected] = useState(false);
+
+  // A defined list of favorites will be sent from the gallery, but an undefined one will be sent on first login.
+  // So if a valid user favorites list are passed as params, then use that.
+  // Otherwise, retrieve the list of the user's favorites from the back end.
+  const [userFavorites, setUserFavorites] = useState<
+    { [apodId: number]: any } | undefined
+  >(
+    params.userFavorites !== undefined
+      ? JSON.parse(params.userFavorites as string)
+      : undefined,
+  ); // Map of apod_id => favorite_id for quick lookups without API calls
+
+  // Fetch user's favorites list once when they log in to avoid repeated API calls
+  useEffect(() => {
+    if (isUserLoggedIn) {
+      fetchUserFavoritesMap();
+    } else {
+      setUserFavorites({}); // Clear favorites if user logs out
+    }
+  }, [isUserLoggedIn]);
+
+  // Fetch all user favorites once and build a map for O(1) lookup
+
+  const fetchUserFavoritesMap = async () => {
+    try {
+      const getFavoriteResp = await fetch(
+        AWS_BASE_URL +
+          `${AWS_USERS_ENDPOINT}/${params.userId}${AWS_FAVORITES_ENDPOINT}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${params.userToken}`,
+          },
+        },
+      );
+
+      const data = await getFavoriteResp.json();
+
+      // Parse the favorites data and build a map of apod_id => favorite_id
+      const favoritesMap: { [apodId: number]: any } = {};
+      if (data.message) {
+        try {
+          // Loop through the favorites data and populate the favoritesMap with apod_id as the key and favorite_id as the value for O(1) lookups later when determining if an APOD is favorited.
+          data.message.forEach((fav: { apod_id: number; id: any }) => {
+            favoritesMap[fav.apod_id] = fav;
+          });
+        } catch (e) {
+          console.error("Error parsing favorites data.");
+        }
+      }
+
+      setUserFavorites(favoritesMap);
+    } catch (error) {
+      console.error("Error fetching user favorites.");
+    }
+  };
+
+  const OnPressFavoritesIcon = () => {
+    setBackToGalleryTabSelected(false);
+    setCommentsTabSelected(false);
+    setSignOutTabSelected(false);
+    setFavoritesTabSelected(true);
+  };
+
+  const OnPressCommentsIcon = () => {
+    setBackToGalleryTabSelected(false);
+    setSignOutTabSelected(false);
+    setFavoritesTabSelected(false);
+    setCommentsTabSelected(true);
+  };
+
   const onPressSignOut = () => {
+    setBackToGalleryTabSelected(false);
+    setFavoritesTabSelected(false);
+    setCommentsTabSelected(false);
+    setSignOutTabSelected(true);
     Alert.alert(
       "Are you sure you want to sign out?",
       "Do you want to continue?",
@@ -15,26 +115,37 @@ export default function LoginScreen() {
         {
           text: "No",
           style: "cancel",
-          onPress: () => console.log("No pressed"),
         },
         {
           text: "Yes",
-          onPress: () =>
+          onPress: () => {
+            setUserFavorites({}); // Clear favorites if user logs out
             // Just return to Gallery with no user token.
             router.push({
               pathname: "./Gallery",
               params: { userId: undefined },
-            }),
+            });
+          },
         },
       ],
     );
   };
 
+  const onPressFavoriteItem = (item: any) => {};
+
   const onPressBackToGallery = () => {
+    setFavoritesTabSelected(false);
+    setCommentsTabSelected(false);
+    setSignOutTabSelected(false);
+    setBackToGalleryTabSelected(true);
     // Pass the user token just to be safe.
     router.push({
       pathname: "./Gallery",
-      params: { userToken: params.userToken, userId: params.userId },
+      params: {
+        userToken: params.userToken,
+        userId: params.userId,
+        userFavorites: JSON.stringify(userFavorites),
+      },
     });
   };
 
@@ -42,33 +153,73 @@ export default function LoginScreen() {
     <View style={{ flex: 1, backgroundColor: "black" }}>
       <View style={UserHomeStyles.pressableViewStyle}>
         <Pressable
-          onPress={() => onPressSignOut()}
-          style={UserHomeStyles.pressableStyle}
+          onPress={() => onPressBackToGallery()}
+          style={{
+            alignItems: "center",
+            backgroundColor: backToGalleryTabSelected ? "gray" : "transparent",
+            borderRadius: 5,
+          }}
         >
-          <FontAwesome name="sign-out" size={32} color="white" />
-          <Text style={UserHomeStyles.pressableTextStyle}>Sign Out</Text>
+          <Entypo name="image" size={32} color="white" />
+          <Text style={UserHomeStyles.pressableTextStyle}>Back to Gallery</Text>
         </Pressable>
         <Pressable
-          onPress={() => console.log("Not implemented yet...")}
-          style={UserHomeStyles.pressableStyle}
-        >
-          <AntDesign name="comment" size={32} color="white" />
-          <Text style={UserHomeStyles.pressableTextStyle}>Your Comments</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => console.log("Not implemented yet...")}
-          style={UserHomeStyles.pressableStyle}
+          onPress={() => OnPressFavoritesIcon()}
+          style={{
+            alignItems: "center",
+            backgroundColor: favoritesTabSelected ? "gray" : "transparent",
+            borderRadius: 5,
+          }}
         >
           <Ionicons name="star-outline" size={32} color="white" />
           <Text style={UserHomeStyles.pressableTextStyle}>Your Favorites</Text>
         </Pressable>
         <Pressable
-          onPress={() => onPressBackToGallery()}
-          style={UserHomeStyles.pressableStyle}
+          onPress={() => OnPressCommentsIcon()}
+          style={{
+            alignItems: "center",
+            backgroundColor: commentsTabSelected ? "gray" : "transparent",
+            borderRadius: 5,
+          }}
         >
-          <Entypo name="image" size={32} color="white" />
-          <Text style={UserHomeStyles.pressableTextStyle}>Back to Gallery</Text>
+          <AntDesign name="comment" size={32} color="white" />
+          <Text style={UserHomeStyles.pressableTextStyle}>Your Comments</Text>
         </Pressable>
+        <Pressable
+          onPress={() => onPressSignOut()}
+          style={{
+            alignItems: "center",
+            backgroundColor: signOutTabSelected ? "gray" : "transparent",
+            borderRadius: 5,
+          }}
+        >
+          <FontAwesome name="sign-out" size={32} color="white" />
+          <Text style={UserHomeStyles.pressableTextStyle}>Sign Out</Text>
+        </Pressable>
+      </View>
+
+      {/* Show the list of their favorited APODs. */}
+      <View style={{ flex: 1 }}>
+        {favoritesTabSelected && (
+          <FlatList
+            data={
+              userFavorites
+                ? Object.entries(userFavorites).map(([apodId, fav]) => ({
+                    apodId,
+                    fav,
+                  }))
+                : []
+            }
+            keyExtractor={(item) => item.apodId.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => onPressFavoriteItem(item)}>
+                <Text style={{ fontSize: 24, color: "white" }}>
+                  {item.fav.title}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
       </View>
     </View>
   );
