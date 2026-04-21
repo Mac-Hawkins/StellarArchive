@@ -131,7 +131,19 @@ export default function LoginScreen() {
     );
   };
 
-  const onPressFavoriteItem = (item: any) => {};
+  const onPressFavoriteItem = (item: any) => {
+    console.log("Pressed favorite item with APOD ID:", item.fav);
+
+    router.push({
+      pathname: "./Gallery",
+      params: {
+        userToken: params.userToken,
+        userId: params.userId,
+        userFavorites: JSON.stringify(userFavorites),
+        selectedApod: JSON.stringify(item.fav), // Pass the selected APOD data to the Gallery screen to display it in the bottom sheet.
+      },
+    });
+  };
 
   const onPressBackToGallery = () => {
     setFavoritesTabSelected(false);

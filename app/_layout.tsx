@@ -28,7 +28,7 @@ export default function RootLayout() {
               headerTitle: "Login",
               headerTitleStyle: { fontSize: 24, fontWeight: "bold" },
               headerTitleAlign: "center", // This centers the title
-              headerBackVisible: false, // Hides the back button on the index screen
+              headerBackVisible: true, // Shows the back button on the index screen
               headerStyle: { backgroundColor: "#acacc7" },
             }}
           />
@@ -38,7 +38,7 @@ export default function RootLayout() {
               headerTitle: "Register",
               headerTitleStyle: { fontSize: 24, fontWeight: "bold" },
               headerTitleAlign: "center", // This centers the title
-              headerBackVisible: true, // Hides the back button on the index screen
+              headerBackVisible: true, // Shows the back button on the index screen
               headerStyle: { backgroundColor: "#acacc7" },
             }}
           />

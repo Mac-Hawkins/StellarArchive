@@ -36,7 +36,7 @@ import {
 import { useApodStore } from "../src/store/ApodStore";
 import { SwipeDirection } from "../src/types/enums/SwipeDirection";
 import { ToastType } from "../src/types/enums/ToastType";
-import { Apod } from "../src/types/interfaces/Apod";
+import type { Apod } from "../src/types/interfaces/Apod";
 import {
   createCurrentDate,
   decrementDate,
@@ -58,6 +58,11 @@ export default function Gallery() {
   // (e.g., hiding the account icon and showing a toast message if they click on it that they need an account).
   const params = useLocalSearchParams();
 
+  // Get the selected APOD id from the URL parameters, if it exists.
+  // This will be used to determine which APOD to show when the user navigates to the gallery from  the user home screen after
+  // clicking on a favorited APOD. If no selectedApod is provided in the URL, default to null.
+  const selectedApod = params.selectedApod ? params.selectedApod : null;
+
   // useEffect is a hook that allows us to fetch data.
   // useState is a hook that allows us to manage state in a state variable that we can then display.
 
@@ -77,6 +82,8 @@ export default function Gallery() {
   );
   const [isApodFavorited, setIsApodFavorited] = useState(false); // Needs to be a state variable so that the component re-renders when the user favorites or un-favorites an APOD to update the color of the star icon.
   const [favoriteId, setFavoriteId] = useState<number | null>(null); // Store the id of the favorite entry for this APOD so we can delete it if the user un-favorites the APOD.
+  // State to disable buttons while login request is in flight to prevent multiple requests.
+  const [disableFavoriteIcon, setDisableFavoriteIcon] = useState(false);
 
   //const [iconFavoriteColor, setIconFavoriteColor] = useState("white"); // State variable to control the color of the favorite icon based on whether the APOD is favorited or not. I don't think I need this.
 
@@ -106,6 +113,27 @@ export default function Gallery() {
   // which can be used to trigger navigation between APODs when a certain threshold is reached.
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
+
+  // Handle selectedApod from URL params (when user clicks a favorite from UserHome)
+  useEffect(() => {
+    if (selectedApod) {
+      const selectedApodData: Apod =
+        typeof selectedApod === "string"
+          ? JSON.parse(selectedApod)
+          : selectedApod;
+
+      // Set the APOD directly without fetching
+      setApod(selectedApodData);
+
+      // Update the store date to match the selected APOD and add it to cache
+      // to prevent the gallery from trying to fetch it again
+      const dateOnly = selectedApodData.date.slice(0, 10);
+      setDate(dateOnly, SwipeDirection.LEFT);
+      pastQueries[selectedApodData.date] = selectedApodData;
+
+      setIsApodFavorited(true); // Since the user clicked on this APOD from their favorites, we know it's favorited, so set the state accordingly to update the UI (e.g., star icon color).
+    }
+  }, [selectedApod]);
 
   // Hides the status/natification bar to when the image is enlarged make it more immersive.
   // When the user exits full screen mode, show the status bar again.
@@ -149,6 +177,7 @@ export default function Gallery() {
   };
 
   const onPressFavorite = async (isUserLoggedIn: boolean) => {
+    setDisableFavoriteIcon(true); // Disable the favorite icon while the request is in flight to prevent multiple requests.
     if (!isUserLoggedIn) {
       showToast("Please log in to favorite APODs!", ToastType.INFO, "center");
     } else if (isApodFavorited) {
@@ -171,18 +200,10 @@ export default function Gallery() {
           "center",
         );
       } else {
-        showToast(
-          "APOD un-favorited successfully!",
-          ToastType.SUCCESS,
-          "center",
-        );
         // Remove from cached favorites
         const newFavorites = { ...userFavorites };
         delete newFavorites[apod?.id ?? -1];
         setUserFavorites(newFavorites);
-        console.log(
-          "APOD un-favorited successfully, removed from favorites cache.",
-        );
       }
     } else {
       const apod_id = apod?.id.toString();
@@ -209,16 +230,16 @@ export default function Gallery() {
           "center",
         );
       } else {
-        showToast("APOD favorited successfully!", ToastType.SUCCESS, "center");
         const data = await postFavoriteResp.json();
         // Add to cached favorites
         setUserFavorites({
           ...userFavorites,
-          [apod?.id ?? -1]: data, // Store the entire favorite object for this APOD in the cache so we have access to the favorite id for unfavoriting without needing to make another API call.
+          [apod?.id ?? -1]: { id: data.favorite_id }, // Store with id field for consistency
         });
         console.log("favorite added to cache.");
       }
     }
+    setDisableFavoriteIcon(false); // Re-enable the favorite icon after the request is complete.
   };
 
   // This function runs when a date is selected from the date picker element.
@@ -579,7 +600,11 @@ export default function Gallery() {
             <AntDesign name="comment" size={32} color="white" />
             <Text style={GalleryStyles.pressableTextStyle}>Comments</Text>
           </Pressable>
-          <Pressable onPress={() => onPressFavorite(isUserLoggedIn)}>
+          <Pressable
+            onPress={() => onPressFavorite(isUserLoggedIn)}
+            disabled={disableFavoriteIcon}
+            style={{ opacity: disableFavoriteIcon ? 0.5 : 1 }} // Reduce opacity when disabled to give visual feedback
+          >
             <Feather name="star" size={32} color={iconFavoriteColor} />
             <Text style={GalleryStyles.pressableTextStyle}>
               {isApodFavorited ? "Unfavorite" : "Favorite"}
