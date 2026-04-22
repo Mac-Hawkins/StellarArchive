@@ -29,6 +29,7 @@ import {
   AWS_APODS_ENDPOINT,
   AWS_AUTHORIZATION,
   AWS_BASE_URL,
+  AWS_COMMENTS_ENDPOINT,
   AWS_FAVORITES_ENDPOINT,
   AWS_USERS_ENDPOINT,
   SCREEN_WIDTH,
@@ -84,6 +85,8 @@ export default function Gallery() {
   const [favoriteId, setFavoriteId] = useState<number | null>(null); // Store the id of the favorite entry for this APOD so we can delete it if the user un-favorites the APOD.
   // State to disable buttons while login request is in flight to prevent multiple requests.
   const [disableFavoriteIcon, setDisableFavoriteIcon] = useState(false);
+  const [apodComments, setApodComments] = useState([]); // State variable to store the comments for the current APOD.
+  const [commentsLoaded, setCommentsLoaded] = useState(false); // State variable to track whether we've loaded the comments for the current APOD yet. This is important because we want to make sure to fetch the comments from the backend when we open the explanation sheet, and we don't want to fetch them multiple times if the user opens and closes the sheet multiple times for the same APOD.
 
   //const [iconFavoriteColor, setIconFavoriteColor] = useState("white"); // State variable to control the color of the favorite icon based on whether the APOD is favorited or not. I don't think I need this.
 
@@ -242,6 +245,10 @@ export default function Gallery() {
     setDisableFavoriteIcon(false); // Re-enable the favorite icon after the request is complete.
   };
 
+  const onPressComment = (item: any) => {
+    console.log("Pressed comment for APOD id:", item.apodId);
+  };
+
   // This function runs when a date is selected from the date picker element.
   const onDatePicked = (
     event: DateTimePickerEvent,
@@ -374,11 +381,42 @@ export default function Gallery() {
     // Only run the following if this screen is currently focused.
     if (!isFocused) return;
 
+    const getCommentsForApod = async (apodId: number) => {
+      try {
+        const commentsResponse = await fetch(
+          AWS_BASE_URL +
+            `${AWS_APODS_ENDPOINT}` +
+            `/${apodId}` +
+            `${AWS_COMMENTS_ENDPOINT}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${AWS_AUTHORIZATION}`,
+            },
+          },
+        );
+        const commentsData = await commentsResponse.json();
+        setCommentsLoaded(true); // Set commentsLoaded to true after we've fetched the comments for the current APOD.
+        setApodComments(commentsData); // Store the comments for the current APOD in state so we can display them in the bottom sheet.
+        return commentsData;
+      } catch (error) {
+        console.error("Error fetching comments for APOD:", error);
+        return null;
+      }
+    };
+
     // When the isSheetOpen state changes, either expand or close the bottom sheet based on the new state.
     // This ensures that the bottom sheet's visibility is in sync with the state in ApodStore.
     if (isSheetOpen) {
       console.log("Opening bottom sheet.");
       bottomSheetRef.current?.expand();
+
+      // Get the comments for the current APOD when we open the sheet to display them in the sheet.
+      // Try getting the APOD first from the backend to see if we have it cached there from a previous fetch. If not, then fetch from the NASA API.
+      if (apod) {
+        getCommentsForApod(apod.id);
+      }
     } else {
       bottomSheetRef.current?.close();
     }
@@ -639,6 +677,8 @@ export default function Gallery() {
           apod={apod}
           bottomSheetRef={bottomSheetRef}
           onCloseSheet={closeSheet}
+          onPressComment={onPressComment}
+          apodComments={apodComments}
         ></ExplanationBottomSheet>
       </View>
     </GestureHandlerRootView>
