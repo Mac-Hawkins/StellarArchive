@@ -6,6 +6,7 @@ This application is just a side project of mine as I wanted to gain more exposur
 
 ## Stellar Archive Demo
 
+Note: I plan on updating this video soon as the UI has changed quite a bit and there are many more features as well.
 [![Stellar Archive Demo](https://img.youtube.com/vi/gV4Tb_dCWro/0.jpg)](https://youtu.be/gV4Tb_dCWro)
 
 ## Database Schema
