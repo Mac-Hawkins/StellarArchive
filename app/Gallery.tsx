@@ -249,6 +249,42 @@ export default function Gallery() {
     console.log("Pressed comment for APOD id:", item.apodId);
   };
 
+  const onPressPostComment = async (comment: string) => {
+    // POST the comment to the apod.
+    try {
+      const commentsResponse = await fetch(
+        AWS_BASE_URL +
+          `${AWS_APODS_ENDPOINT}` +
+          `/${apod?.id}` +
+          `${AWS_COMMENTS_ENDPOINT}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${params.userToken}`,
+          },
+          body: JSON.stringify({
+            userId: params.userId,
+            message: comment,
+          }),
+        },
+      );
+
+      if (!commentsResponse.ok) {
+        showToast(
+          "Error posting comment. Please try again later.",
+          ToastType.ERROR,
+          "center",
+        );
+      } else {
+        getCommentsForApod(apod?.id ?? -1); // Refresh the comments after posting a new comment to show the new comment in the list.
+        showToast("Comment posted!", ToastType.SUCCESS, "center");
+      }
+    } catch (error) {
+      console.error("Error posting comment");
+    }
+  };
+
   // This function runs when a date is selected from the date picker element.
   const onDatePicked = (
     event: DateTimePickerEvent,
@@ -376,35 +412,35 @@ export default function Gallery() {
   // Get the isSheetOpen state from ApodStore to determine whether the bottom sheet should be open or closed.
   const isSheetOpen = useApodStore((state) => state.isSheetOpen);
 
+  const getCommentsForApod = async (apodId: number) => {
+    try {
+      const commentsResponse = await fetch(
+        AWS_BASE_URL +
+          `${AWS_APODS_ENDPOINT}` +
+          `/${apodId}` +
+          `${AWS_COMMENTS_ENDPOINT}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${AWS_AUTHORIZATION}`,
+          },
+        },
+      );
+      const commentsData = await commentsResponse.json();
+      setCommentsLoaded(true); // Set commentsLoaded to true after we've fetched the comments for the current APOD.
+      setApodComments(commentsData); // Store the comments for the current APOD in state so we can display them in the bottom sheet.
+      return commentsData;
+    } catch (error) {
+      console.error("Error fetching comments for APOD:", error);
+      return null;
+    }
+  };
+
   // useEffect that runs everytime isSheetOpen changes.
   useEffect(() => {
     // Only run the following if this screen is currently focused.
     if (!isFocused) return;
-
-    const getCommentsForApod = async (apodId: number) => {
-      try {
-        const commentsResponse = await fetch(
-          AWS_BASE_URL +
-            `${AWS_APODS_ENDPOINT}` +
-            `/${apodId}` +
-            `${AWS_COMMENTS_ENDPOINT}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `${AWS_AUTHORIZATION}`,
-            },
-          },
-        );
-        const commentsData = await commentsResponse.json();
-        setCommentsLoaded(true); // Set commentsLoaded to true after we've fetched the comments for the current APOD.
-        setApodComments(commentsData); // Store the comments for the current APOD in state so we can display them in the bottom sheet.
-        return commentsData;
-      } catch (error) {
-        console.error("Error fetching comments for APOD:", error);
-        return null;
-      }
-    };
 
     // When the isSheetOpen state changes, either expand or close the bottom sheet based on the new state.
     // This ensures that the bottom sheet's visibility is in sync with the state in ApodStore.
@@ -678,7 +714,9 @@ export default function Gallery() {
           bottomSheetRef={bottomSheetRef}
           onCloseSheet={closeSheet}
           onPressComment={onPressComment}
+          onPressPostComment={onPressPostComment}
           apodComments={apodComments}
+          isUserLoggedIn={isUserLoggedIn}
         ></ExplanationBottomSheet>
       </View>
     </GestureHandlerRootView>

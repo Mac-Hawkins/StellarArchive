@@ -7,9 +7,7 @@ Features
         - Shrink the APOD, and APOD title when the explanation is brought up.
         - Implement favorite, comments, and search functions.
         - Add UI to add comments.
-        - Make another option for users to see their comments.
-        - Return the apod id from backend on POST request.
-        
+        - Make another option for users to see their comments.        
 
     Backend
         - Maybe change the created_at col in comments to a date datatype instead of timestamp.
