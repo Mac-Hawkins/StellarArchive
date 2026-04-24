@@ -23,6 +23,7 @@ Table favorites {
 
 Table comments {
   id serial [primary key, not null]
+  parent_comment_id integer
   created_at timestamp [not null]
   message text [not null]
   user_id integer [not null]

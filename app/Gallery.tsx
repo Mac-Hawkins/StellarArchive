@@ -245,11 +245,10 @@ export default function Gallery() {
     setDisableFavoriteIcon(false); // Re-enable the favorite icon after the request is complete.
   };
 
-  const onPressComment = (item: any) => {
-    console.log("Pressed comment for APOD id:", item.apodId);
-  };
-
-  const onPressPostComment = async (comment: string) => {
+  const onPressPostComment = async (
+    comment: string,
+    parentCommentId: number | null,
+  ) => {
     // POST the comment to the apod.
     try {
       const commentsResponse = await fetch(
@@ -266,6 +265,7 @@ export default function Gallery() {
           body: JSON.stringify({
             userId: params.userId,
             message: comment,
+            parentCommentId: parentCommentId, // This can be null if it's a top-level comment, or it can be the id of the comment being replied to for nested comments.
           }),
         },
       );
@@ -713,7 +713,6 @@ export default function Gallery() {
           apod={apod}
           bottomSheetRef={bottomSheetRef}
           onCloseSheet={closeSheet}
-          onPressComment={onPressComment}
           onPressPostComment={onPressPostComment}
           apodComments={apodComments}
           isUserLoggedIn={isUserLoggedIn}
