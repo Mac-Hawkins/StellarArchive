@@ -11,7 +11,7 @@ Note: I plan on updating this video soon as the UI has changed quite a bit and t
 
 ## Database Schema
 
-![Database Schema](docs/schema.png)
+![Database Schema](database/schema.png)
 
 ## Database Info
 
