@@ -704,6 +704,7 @@ export default function Gallery() {
             <ApodCard
               apod={apod}
               onOpen={() => setIsFullScreen(true)}
+              onLoadEnd={() => setIsApodShown(true)}
             ></ApodCard>
           </Animated.View>
         </GestureDetector>

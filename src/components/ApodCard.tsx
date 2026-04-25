@@ -6,12 +6,13 @@ import { Apod } from "../types/interfaces/Apod";
 interface ApodCardProps {
   apod: Apod | undefined;
   onOpen: () => void;
+  onLoadEnd: () => void;
 }
 
 // Component to represent the actual APOD card that can be swiped.
 // This would include the title of the image, the image itself,
 // and the image date.
-export const ApodCard = ({ apod, onOpen }: ApodCardProps) => {
+export const ApodCard = ({ apod, onOpen, onLoadEnd }: ApodCardProps) => {
   return (
     <View style={GalleryStyles.containerApodView}>
       {/* The title of the APOD image */}
@@ -25,6 +26,7 @@ export const ApodCard = ({ apod, onOpen }: ApodCardProps) => {
           <Image
             style={GalleryStyles.imageApodNormal}
             source={{ uri: apod?.image_url }}
+            onLoadEnd={onLoadEnd}
           />
         </TouchableWithoutFeedback>
       </View>
