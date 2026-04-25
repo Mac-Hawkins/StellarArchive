@@ -433,7 +433,7 @@ export default function Gallery() {
       setApodComments(commentsData); // Store the comments for the current APOD in state so we can display them in the bottom sheet.
       return commentsData;
     } catch (error) {
-      console.error("Error fetching comments for APOD:", error);
+      console.error("Error fetching comments for APOD.");
       return null;
     }
   };
@@ -569,7 +569,7 @@ export default function Gallery() {
         // and to ensure consistency in the data structure we are using throughout the app.
         // TODO: We could optimize this by having the backend return the cached APOD data in the response when we cache it, so we don't have to make a second fetch request to get the same data right after caching it.
         if (!postApodResponse.ok) {
-          console.error("Error caching APOD on backend.");
+          console.log("Error caching APOD on backend.");
         } else {
           // Add the id from the backend to the data object so we can use it for favoriting and other operations that require the APOD id.
           const temp = await postApodResponse.json();
@@ -608,12 +608,10 @@ export default function Gallery() {
         i < MAX_APOD_SKIPS
       ) {
         showToast(
-          "Media type was not an image, skipping to the next one.",
+          "Skipped date - media type was not an image.",
           ToastType.INFO,
           "center",
         );
-        console.log("Media type was not an image, skipping ahead.");
-        console.log("swipeDirection:", swipeDirection);
 
         // If the user was navigating to the next day,
         // keep going forward one day until we find an image.
