@@ -3,7 +3,7 @@ import {
   AWS_FAVORITES_ENDPOINT,
   AWS_USERS_ENDPOINT,
 } from "@/src/constants/config";
-import { AntDesign, Entypo, FontAwesome, Ionicons } from "@expo/vector-icons";
+import { Entypo, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -26,7 +26,8 @@ export default function LoginScreen() {
 
   // useStates to track which tab is selected in the user home screen.
   // Only one can be selected at a time, and the selected tab will be highlighted in the UI.
-  const [favoritesTabSelected, setFavoritesTabSelected] = useState(false);
+  const [favoritesTabSelected, setFavoritesTabSelected] = useState(true);
+  const [areFavoritesShown, setAreFavoritesShown] = useState(false); //State variable to store and update the status of the favorites being displayed.
   const [commentsTabSelected, setCommentsTabSelected] = useState(false);
   const [backToGalleryTabSelected, setBackToGalleryTabSelected] =
     useState(false);
@@ -46,14 +47,15 @@ export default function LoginScreen() {
   // Fetch user's favorites list once when they log in to avoid repeated API calls
   useEffect(() => {
     if (isUserLoggedIn) {
+      setAreFavoritesShown(false);
       fetchUserFavoritesMap();
+      setAreFavoritesShown(true);
     } else {
       setUserFavorites({}); // Clear favorites if user logs out
     }
   }, [isUserLoggedIn]);
 
   // Fetch all user favorites once and build a map for O(1) lookup
-
   const fetchUserFavoritesMap = async () => {
     try {
       const getFavoriteResp = await fetch(
@@ -94,13 +96,6 @@ export default function LoginScreen() {
     setCommentsTabSelected(false);
     setSignOutTabSelected(false);
     setFavoritesTabSelected(true);
-  };
-
-  const OnPressCommentsIcon = () => {
-    setBackToGalleryTabSelected(false);
-    setSignOutTabSelected(false);
-    setFavoritesTabSelected(false);
-    setCommentsTabSelected(true);
   };
 
   const onPressSignOut = () => {
@@ -186,17 +181,7 @@ export default function LoginScreen() {
           <Ionicons name="star-outline" size={32} color="white" />
           <Text style={UserHomeStyles.pressableTextStyle}>Your Favorites</Text>
         </Pressable>
-        <Pressable
-          onPress={() => OnPressCommentsIcon()}
-          style={{
-            alignItems: "center",
-            backgroundColor: commentsTabSelected ? "gray" : "transparent",
-            borderRadius: 5,
-          }}
-        >
-          <AntDesign name="comment" size={32} color="white" />
-          <Text style={UserHomeStyles.pressableTextStyle}>Your Comments</Text>
-        </Pressable>
+
         <Pressable
           onPress={() => onPressSignOut()}
           style={{
@@ -209,8 +194,20 @@ export default function LoginScreen() {
           <Text style={UserHomeStyles.pressableTextStyle}>Sign Out</Text>
         </Pressable>
       </View>
+      <View
+        style={{
+          backgroundColor: "black",
+          justifyContent: "center",
+          alignContent: "center",
+          alignItems: "center",
+        }}
+      >
+        {!areFavoritesShown && (
+          <Text style={{ color: "white" }}>Loading...</Text>
+        )}
+      </View>
 
-      {/* Show the list of their favorited APODs. */}
+      {/* Show the list of their favorites */}
       <View style={{ flex: 1 }}>
         {favoritesTabSelected && (
           <FlatList

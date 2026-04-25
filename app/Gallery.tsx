@@ -3,7 +3,7 @@ import { ApodFullScreenModal } from "@/src/components/ApodFullScreenModal";
 import { DatePicker } from "@/src/components/DatePicker";
 import { ExplanationBottomSheet } from "@/src/components/ExplanationBottomSheet";
 import { ExplanationIndicator } from "@/src/components/ExplanationIndicator";
-import { AntDesign, Feather, Fontisto, Ionicons } from "@expo/vector-icons";
+import { Feather, Fontisto, Ionicons } from "@expo/vector-icons";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useIsFocused } from "@react-navigation/native";
@@ -69,6 +69,7 @@ export default function Gallery() {
 
   // States
   const [apod, setApod] = useState<Apod>(); // State variable to store and update the APOD.
+  const [isApodShown, setIsApodShown] = useState(false); // State variable to store and update the status of the APOD being displayed.
   const [showDatePicker, setShowDatePicker] = useState(false); // State variable to control whether the date picker is visible or not.
   const [datePicked, setDatePicked] = useState(new Date()); // State variable to store the date selected from the date picker. Defaults to current date.
   const [isFullScreen, setIsFullScreen] = useState(false); // State variable to track whether the APOD image is in full screen mode or not.
@@ -595,6 +596,7 @@ export default function Gallery() {
   };
 
   const fetchApods = async () => {
+    setIsApodShown(false);
     let data: any = await fetchApodsFromBackendOrNasa(date);
 
     try {
@@ -633,6 +635,7 @@ export default function Gallery() {
       // 2. Set the new image data
       // Update the state variable with the fetched APOD data.
       console.log("Fetched APOD data:", data);
+      setIsApodShown(true);
       setApod(data);
 
       // 3. Smoothly slide the new card into the center
@@ -670,20 +673,28 @@ export default function Gallery() {
             />
             <Text style={GalleryStyles.pressableTextStyle}>Date</Text>
           </Pressable>
-          <Pressable>
-            <AntDesign name="comment" size={32} color="white" />
-            <Text style={GalleryStyles.pressableTextStyle}>Comments</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => onPressFavorite(isUserLoggedIn)}
-            disabled={disableFavoriteIcon}
-            style={{ opacity: disableFavoriteIcon ? 0.5 : 1 }} // Reduce opacity when disabled to give visual feedback
-          >
-            <Feather name="star" size={32} color={iconFavoriteColor} />
-            <Text style={GalleryStyles.pressableTextStyle}>
+          <View style={{ alignItems: "center", width: 50 }}>
+            <Pressable
+              onPress={() => onPressFavorite(isUserLoggedIn)}
+              disabled={disableFavoriteIcon}
+              style={{
+                opacity: disableFavoriteIcon ? 0.5 : 1,
+              }} // Reduce opacity when disabled to give visual feedback
+            >
+              <Feather name="star" size={32} color={iconFavoriteColor} />
+            </Pressable>
+            <Text
+              style={{
+                fontSize: 8,
+                fontWeight: "bold",
+                textAlign: "center",
+                color: "white",
+                width: 80,
+              }}
+            >
               {isApodFavorited ? "Unfavorite" : "Favorite"}
             </Text>
-          </Pressable>
+          </View>
         </View>
 
         {/* // Wrap in GestureDetector to handle swipe gestures for navigation between APODs. */}
@@ -703,6 +714,17 @@ export default function Gallery() {
           isFullScreen={isFullScreen}
           onClose={() => setIsFullScreen(false)}
         ></ApodFullScreenModal>
+
+        <View
+          style={{
+            backgroundColor: "black",
+            justifyContent: "center",
+            alignContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {!isApodShown && <Text style={{ color: "white" }}>Loading...</Text>}
+        </View>
 
         <Animated.View style={{ transform: [{ translateY }] }}>
           <ExplanationIndicator />
