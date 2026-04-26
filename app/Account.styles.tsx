@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-const UserHomeStyles = StyleSheet.create({
+const AccountStyles = StyleSheet.create({
   pressableViewStyle: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -18,4 +18,4 @@ const UserHomeStyles = StyleSheet.create({
   },
 });
 
-export default UserHomeStyles;
+export default AccountStyles;

@@ -43,9 +43,9 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
-            name="UserHome"
+            name="Account"
             options={{
-              headerTitle: "User Home",
+              headerTitle: "Account",
               headerTitleStyle: { fontSize: 24, fontWeight: "bold" },
               headerTitleAlign: "center", // This centers the title
               headerBackVisible: false, // Hides the back button on the index screen

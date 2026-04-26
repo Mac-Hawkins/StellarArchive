@@ -112,7 +112,7 @@ export default function Gallery() {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
 
-  // Handle selectedApod from URL params (when user clicks a favorite from UserHome)
+  // Handle selectedApod from URL params (when user clicks a favorite from Account)
   useEffect(() => {
     if (selectedApod) {
       const selectedApodData: Apod =
@@ -164,7 +164,7 @@ export default function Gallery() {
       router.push("./Login");
     } else {
       router.push({
-        pathname: "./UserHome",
+        pathname: "./Account",
         params: {
           userToken: params.userToken,
           userId: params.userId,

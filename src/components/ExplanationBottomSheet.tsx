@@ -3,12 +3,12 @@ import { AntDesign, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  Text,
-  View,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    Text,
+    View,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { Apod } from "../types/interfaces/Apod";
@@ -42,7 +42,7 @@ export const ExplanationBottomSheet = ({
 
   const onPressSend = (comment: string, parentCommentId: number | null) => {
     Keyboard.dismiss(); // Dismiss the keyboard after pressing send. This way toast will show.
-    onPressPostComment(comment, parentCommentId); // Call the function passed from UserHome to post the comment to the backend.
+    onPressPostComment(comment, parentCommentId); // Call the function passed from Account to post the comment to the backend.
     setText(""); // Clear the text input after posting the comment.
     setReplyingTo(null); // Clear the replying state after sending
   };

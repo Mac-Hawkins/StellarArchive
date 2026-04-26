@@ -55,7 +55,7 @@ export default function LoginScreen() {
         const decoded: any = jwtDecode(token);
         const userId = decoded.userId;
         router.push({
-          pathname: "./UserHome",
+          pathname: "./Account",
           params: { userToken: token, userId: userId },
         });
       } else {

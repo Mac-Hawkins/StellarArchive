@@ -37,12 +37,12 @@ export default function LoginScreen() {
       const data = await response.json();
       if (data.message.includes("Login successful")) {
         showToast("Login successful!", ToastType.SUCCESS, "center");
-        // Get token and user ID from response, then navigate to UserHome screen with token as param.
+        // Get token and user ID from response, then navigate to Account screen with token as param.
         const token = data.token;
         const decoded: any = jwtDecode(token);
         const userId = decoded.userId;
         router.push({
-          pathname: "./UserHome",
+          pathname: "./Account",
           params: { userToken: token, userId: userId },
         });
       } else {

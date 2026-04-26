@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import UserHomeStyles from "./UserHome.styles";
+import AccountStyles from "./Account.styles";
 
 // Entry point of application. This is the first screen that users see when they open the app.
 export default function LoginScreen() {
@@ -147,7 +147,7 @@ export default function LoginScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: "black" }}>
-      <View style={UserHomeStyles.pressableViewStyle}>
+      <View style={AccountStyles.pressableViewStyle}>
         <Pressable
           onPress={() => onPressBackToGallery()}
           style={{
@@ -157,7 +157,7 @@ export default function LoginScreen() {
           }}
         >
           <Entypo name="image" size={32} color="white" />
-          <Text style={UserHomeStyles.pressableTextStyle}>Back to Gallery</Text>
+          <Text style={AccountStyles.pressableTextStyle}>Back to Gallery</Text>
         </Pressable>
         <Pressable
           onPress={() => OnPressFavoritesIcon()}
@@ -168,7 +168,7 @@ export default function LoginScreen() {
           }}
         >
           <Ionicons name="star-outline" size={32} color="white" />
-          <Text style={UserHomeStyles.pressableTextStyle}>Your Favorites</Text>
+          <Text style={AccountStyles.pressableTextStyle}>Your Favorites</Text>
         </Pressable>
 
         <Pressable
@@ -180,7 +180,7 @@ export default function LoginScreen() {
           }}
         >
           <FontAwesome name="sign-out" size={32} color="white" />
-          <Text style={UserHomeStyles.pressableTextStyle}>Sign Out</Text>
+          <Text style={AccountStyles.pressableTextStyle}>Sign Out</Text>
         </Pressable>
       </View>
       <View
