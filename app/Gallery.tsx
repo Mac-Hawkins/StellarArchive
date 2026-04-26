@@ -535,7 +535,7 @@ export default function Gallery() {
     // GestureDetector must be wrapped by GestureHandlerRootView.
     <GestureHandlerRootView>
       {/* Makes the entire screen black, including the area behind the status bar. */}
-      <View style={{ flex: 1, backgroundColor: "black" }}>
+      <View style={GalleryStyles.viewBlackBackground}>
         <View style={GalleryStyles.pressableViewStyle}>
           <Pressable onPress={() => onPressAccount(isUserLoggedIn)}>
             <Ionicons name="person-circle-outline" size={32} color="white" />
@@ -553,7 +553,7 @@ export default function Gallery() {
             />
             <Text style={GalleryStyles.pressableTextStyle}>Date</Text>
           </Pressable>
-          <View style={{ alignItems: "center", width: 50 }}>
+          <View style={GalleryStyles.viewFavorite}>
             <Pressable
               onPress={() => onPressFavorite(isUserLoggedIn)}
               disabled={disableFavoriteIcon}
@@ -563,15 +563,7 @@ export default function Gallery() {
             >
               <Feather name="star" size={32} color={iconFavoriteColor} />
             </Pressable>
-            <Text
-              style={{
-                fontSize: 8,
-                fontWeight: "bold",
-                textAlign: "center",
-                color: "white",
-                width: 80,
-              }}
-            >
+            <Text style={GalleryStyles.textFavorite}>
               {isApodFavorited ? "Unfavorite" : "Favorite"}
             </Text>
           </View>
@@ -596,15 +588,10 @@ export default function Gallery() {
           onClose={() => setIsFullScreen(false)}
         ></ApodFullScreenModal>
 
-        <View
-          style={{
-            backgroundColor: "black",
-            justifyContent: "center",
-            alignContent: "center",
-            alignItems: "center",
-          }}
-        >
-          {!isApodShown && <Text style={{ color: "white" }}>Loading...</Text>}
+        <View style={GalleryStyles.viewLoading}>
+          {!isApodShown && (
+            <Text style={GalleryStyles.textLoading}>Loading...</Text>
+          )}
         </View>
 
         <Animated.View style={{ transform: [{ translateY }] }}>

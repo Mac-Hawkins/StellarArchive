@@ -183,16 +183,9 @@ export default function LoginScreen() {
           <Text style={AccountStyles.pressableTextStyle}>Sign Out</Text>
         </Pressable>
       </View>
-      <View
-        style={{
-          backgroundColor: "black",
-          justifyContent: "center",
-          alignContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <View style={AccountStyles.viewLoading}>
         {!areFavoritesShown && (
-          <Text style={{ color: "white" }}>Loading...</Text>
+          <Text style={AccountStyles.textLoading}>Loading...</Text>
         )}
       </View>
 
@@ -211,9 +204,7 @@ export default function LoginScreen() {
             keyExtractor={(item) => item.apodId.toString()}
             renderItem={({ item }) => (
               <TouchableOpacity onPress={() => onPressFavoriteItem(item)}>
-                <Text style={{ fontSize: 24, color: "white" }}>
-                  {item.fav.title}
-                </Text>
+                <Text style={AccountStyles.itemText}>{item.fav.title}</Text>
               </TouchableOpacity>
             )}
           />

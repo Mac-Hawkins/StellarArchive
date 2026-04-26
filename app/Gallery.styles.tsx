@@ -5,6 +5,10 @@ const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
 const GalleryStyles = StyleSheet.create({
+  viewBlackBackground: {
+    flex: 1,
+    backgroundColor: "black",
+  },
   containerApodView: {
     flex: 1,
     justifyContent: "center",
@@ -21,6 +25,17 @@ const GalleryStyles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     color: "white",
+  },
+  viewFavorite: {
+    alignItems: "center",
+    width: 50,
+  },
+  textFavorite: {
+    fontSize: 8,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "white",
+    width: 80,
   },
   textApodTitle: {
     fontSize: 20,
@@ -40,6 +55,13 @@ const GalleryStyles = StyleSheet.create({
     height: screenHeight * 0.6,
     resizeMode: "contain",
   },
+  viewLoading: {
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignContent: "center",
+    alignItems: "center",
+  },
+  textLoading: { color: "white" },
   textDate: {
     fontSize: 20,
     fontWeight: "bold",

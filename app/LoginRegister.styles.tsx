@@ -1,6 +1,12 @@
 import { StyleSheet } from "react-native";
 
+// Both Login and Register screens are very similiar so I figured I'd consolidate their styles here.
+
 const loginRegisterStyles = StyleSheet.create({
+  viewBlackBackground: {
+    flex: 1,
+    backgroundColor: "black",
+  },
   loginOuterView: { alignItems: "center", paddingTop: 30 },
   inputView: {
     alignItems: "center",

@@ -16,6 +16,14 @@ const AccountStyles = StyleSheet.create({
     textAlign: "center",
     color: "white",
   },
+  viewLoading: {
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignContent: "center",
+    alignItems: "center",
+  },
+  textLoading: { color: "white" },
+  itemText: { fontSize: 24, color: "white" },
 });
 
 export default AccountStyles;

@@ -71,7 +71,7 @@ export default function LoginScreen() {
   // Rendering
 
   return (
-    <View style={{ flex: 1, backgroundColor: "black" }}>
+    <View style={loginRegisterStyles.viewBlackBackground}>
       <View style={loginRegisterStyles.loginOuterView}>
         <View style={loginRegisterStyles.inputView}>
           <Text style={loginRegisterStyles.inputLabel}>Username</Text>
