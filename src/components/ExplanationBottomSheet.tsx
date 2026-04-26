@@ -3,12 +3,12 @@ import { AntDesign, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    Text,
-    View,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  Text,
+  View,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { Apod } from "../types/interfaces/Apod";
@@ -124,6 +124,15 @@ export const ExplanationBottomSheet = ({
             </Text>
 
             <Text style={GalleryStyles.textExplanationTitle}>Comments</Text>
+          </View>
+        }
+        ListEmptyComponent={
+          <View
+            style={{ alignItems: "center", marginTop: 30, marginBottom: 20 }}
+          >
+            <Text style={{ fontSize: 16, color: "white" }}>
+              There are no comments for this APOD yet
+            </Text>
           </View>
         }
         keyExtractor={(item: { id: any }) => item.id.toString()}
