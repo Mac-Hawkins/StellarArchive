@@ -21,36 +21,24 @@ exports.handler = async (event) => {
   const body = JSON.parse(event.body);
   const username = body.username;
   const password = body.password;
+
+  await dbClient.connect();
+
   let errorMsg;
-  let userExists;
+  let isValid;
   let userId;
 
   try {
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(
-      password,
-      parseInt(process.env.SALT_ROUNDS, 10),
-    );
-
-    await dbClient.connect();
-
-    // Query the RDS to see if the username already exists.
-    userExists = await dbClient.query(
-      `SELECT EXISTS (SELECT 1 FROM users WHERE username = $1) AS user_exists`,
-      [username],
-    );
+    // Query the RDS to get the info of the username
+    let res = await dbClient.query(`SELECT * FROM users WHERE username = $1`, [
+      username,
+    ]);
 
     // If the username doesn't already exist...
-    if (!userExists.rows[0].user_exists) {
-      // Insert the user.
-      const res = await dbClient.query(
-        "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id",
-        [username, hashedPassword],
-      );
-
-      if (res.rows && res.rows.length > 0) {
-        userId = res.rows[0].id;
-      }
+    if (res.rows && res.rows.length > 0) {
+      let hashedPassword = res.rows[0].password;
+      isValid = await bcrypt.compare(password, hashedPassword);
+      userId = res.rows[0].id;
     }
   } catch (error) {
     errorMsg = error.message;
@@ -65,26 +53,22 @@ exports.handler = async (event) => {
     };
   }
 
-  // If the username already exists...
-  if (userExists.rows[0].user_exists) {
-    // Return a 409 conflict error stating so.
-    return {
-      statusCode: 409,
-      body: JSON.stringify({ error: "User already exists" }),
-    };
-  } else {
+  // If user info matches, sign JWT to login.
+  if (isValid) {
     const payload = { userId: userId, username };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
+    // 201 is created code.
     return {
       statusCode: 201,
-      body: JSON.stringify({
-        message: "User created",
-        username,
-        userId,
-        token,
-      }),
+      body: JSON.stringify({ message: "Login successful. JWT:", token }),
+    };
+  } else {
+    // Return a 409 conflict error stating so.
+    return {
+      statusCode: 409,
+      body: JSON.stringify({ message: "User info doesn't match our records." }),
     };
   }
 };

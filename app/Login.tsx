@@ -2,7 +2,7 @@ import { loginUser } from "@/src/services/users";
 import { ToastType } from "@/src/types/enums/ToastType";
 import { Link, useRouter } from "expo-router";
 import { jwtDecode } from "jwt-decode";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { showToast } from "../src/utils/ToastMessages";
 import loginRegisterStyles from "./LoginRegister.styles";
@@ -16,6 +16,16 @@ export default function LoginScreen() {
 
   // State to disable buttons while login request is in flight to prevent multiple requests.
   const [disabled, setDisabled] = useState(false);
+
+  // Reset component state when this screen is mounted to ensure clean state
+  useEffect(() => {
+    return () => {
+      // Reset state when component unmounts
+      setUsername("");
+      setPassword("");
+      setDisabled(false);
+    };
+  }, []);
 
   // Verify that user exists with credentials and log in.
   const onPressLogin = async () => {
@@ -35,17 +45,21 @@ export default function LoginScreen() {
       const response = await loginUser(username, password);
 
       const data = await response.json();
-      if (data.message.includes("Login successful")) {
-        showToast("Login successful!", ToastType.SUCCESS, "center");
+      if ("message" in data && data.message.includes("Login successful")) {
         // Get token and user ID from response, then navigate to Account screen with token as param.
         const token = data.token;
         const decoded: any = jwtDecode(token);
         const userId = decoded.userId;
-        router.push({
-          pathname: "./Account",
-          params: { userToken: token, userId: userId },
-        });
+        showToast("Login successful!", ToastType.SUCCESS, "center");
+        // Add delay to allow toast to display before navigating
+        setTimeout(() => {
+          router.push({
+            pathname: "./Account",
+            params: { userToken: token, userId: userId },
+          });
+        }, 500);
       } else {
+        setDisabled(false); // Explicitly reset disabled state before showing toast
         showToast(
           "Login failed. User doesn't match our records.",
           ToastType.ERROR,
@@ -53,6 +67,8 @@ export default function LoginScreen() {
         );
       }
     } catch (e) {
+      console.error("Login error");
+      setDisabled(false); // Explicitly reset disabled state before showing toast
       showToast("Network error.", ToastType.ERROR, "center");
     } finally {
       setDisabled(false);

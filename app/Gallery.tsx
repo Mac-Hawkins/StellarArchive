@@ -219,7 +219,6 @@ export default function Gallery() {
           ...userFavorites,
           [apod?.id ?? -1]: { id: data.favorite_id }, // Store with id field for consistency
         });
-        console.log("favorite added to cache.");
       }
     }
     setDisableFavoriteIcon(false); // Re-enable the favorite icon after the request is complete.

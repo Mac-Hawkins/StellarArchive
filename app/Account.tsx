@@ -45,7 +45,6 @@ export default function LoginScreen() {
     if (isUserLoggedIn) {
       setAreFavoritesShown(false);
       fetchUserFavoritesMap();
-      setAreFavoritesShown(true);
     } else {
       setUserFavorites({}); // Clear favorites if user logs out
     }
@@ -63,7 +62,10 @@ export default function LoginScreen() {
 
       // Parse the favorites data and build a map of apod_id => favorite_id
       const favoritesMap: { [apodId: number]: any } = {};
-      if (data.message) {
+      if (
+        "message" in data &&
+        !data.message.includes("No favorites found for this user.")
+      ) {
         try {
           // Loop through the favorites data and populate the favoritesMap with apod_id as the key and favorite_id as the value for O(1) lookups later when determining if an APOD is favorited.
           data.message.forEach((fav: { apod_id: number; id: any }) => {
@@ -73,10 +75,11 @@ export default function LoginScreen() {
           console.error("Error parsing favorites data.");
         }
       }
-
       setUserFavorites(favoritesMap);
+      setAreFavoritesShown(true);
     } catch (error) {
       console.error("Error fetching user favorites.");
+      setAreFavoritesShown(true);
     }
   };
 
@@ -200,6 +203,21 @@ export default function LoginScreen() {
                     fav,
                   }))
                 : []
+            }
+            ListEmptyComponent={
+              <View
+                style={{
+                  alignItems: "center",
+                  marginTop: 30,
+                  marginBottom: 20,
+                }}
+              >
+                {areFavoritesShown && (
+                  <Text style={{ fontSize: 16, color: "white" }}>
+                    No APODs have been favorited.
+                  </Text>
+                )}
+              </View>
             }
             keyExtractor={(item) => item.apodId.toString()}
             renderItem={({ item }) => (

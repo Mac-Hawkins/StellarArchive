@@ -131,7 +131,7 @@ export const ExplanationBottomSheet = ({
             style={{ alignItems: "center", marginTop: 30, marginBottom: 20 }}
           >
             <Text style={{ fontSize: 16, color: "white" }}>
-              There are no comments for this APOD yet
+              There are no comments for this APOD yet.
             </Text>
           </View>
         }

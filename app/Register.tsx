@@ -49,8 +49,8 @@ export default function LoginScreen() {
       const response = await registerUser(username, password);
 
       const data = await response.json();
-      if (data.message.includes("User created")) {
-        alert("Register successful!.");
+      if ("message" in data && data.message.includes("User created")) {
+        showToast("Register successful!", ToastType.SUCCESS, "center");
         const token = data.token;
         const decoded: any = jwtDecode(token);
         const userId = decoded.userId;
@@ -58,6 +58,11 @@ export default function LoginScreen() {
           pathname: "./Account",
           params: { userToken: token, userId: userId },
         });
+      } else if (
+        "error" in data &&
+        data.error.includes("User already exists")
+      ) {
+        showToast("Username already exists.", ToastType.ERROR, "center");
       } else {
         showToast("Register failed.", ToastType.ERROR, "center");
       }
