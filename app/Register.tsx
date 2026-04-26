@@ -1,8 +1,4 @@
-import {
-  AWS_AUTHORIZATION,
-  AWS_BASE_URL,
-  AWS_REGISTER_ENDPOINT,
-} from "@/src/constants/config";
+import { registerUser } from "@/src/services/users";
 import { ToastType } from "@/src/types/enums/ToastType";
 import { showToast } from "@/src/utils/ToastMessages";
 import { useRouter } from "expo-router";
@@ -50,17 +46,7 @@ export default function LoginScreen() {
 
     try {
       // Attempt to register user with backend.
-      const response = await fetch(AWS_BASE_URL + `${AWS_REGISTER_ENDPOINT}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${AWS_AUTHORIZATION}`,
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      });
+      const response = await registerUser(username, password);
 
       const data = await response.json();
       if (data.message.includes("User created")) {

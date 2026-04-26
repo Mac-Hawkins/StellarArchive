@@ -1,14 +1,9 @@
+import { loginUser } from "@/src/services/users";
 import { ToastType } from "@/src/types/enums/ToastType";
-import { fetch } from "cross-fetch"; // or use 'node-fetch' or the native fetch in RN 0.64+
 import { Link, useRouter } from "expo-router";
 import { jwtDecode } from "jwt-decode";
 import React, { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
-import {
-  AWS_AUTHORIZATION,
-  AWS_BASE_URL,
-  AWS_LOGIN_ENDPOINT,
-} from "../src/constants/config";
 import { showToast } from "../src/utils/ToastMessages";
 import loginRegisterStyles from "./LoginRegister.styles";
 
@@ -37,17 +32,7 @@ export default function LoginScreen() {
     }
     try {
       // Send login request to backend.
-      const response = await fetch(AWS_BASE_URL + `${AWS_LOGIN_ENDPOINT}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${AWS_AUTHORIZATION}`,
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      });
+      const response = await loginUser(username, password);
 
       const data = await response.json();
       if (data.message.includes("Login successful")) {

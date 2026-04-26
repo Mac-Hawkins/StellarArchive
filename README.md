@@ -1,13 +1,63 @@
 # Welcome to Stellar Archive
 
-StellarArchive is a mobile application that fetches NASA's Astronomy Photo of the Day using [NASA's APOD API](https://api.nasa.gov/).
+StellarArchive is a mobile application that allows users to fetch NASA's Astronomy Photo of the Day (APOD) using [NASA's APOD API](https://api.nasa.gov/). Users can swipe to retrieve the prior day's APOD or select a specific date to retrieve the APOD published on that day. Each APOD has an explanation associated with it, and it can be view by swiping up on the APOD. Also, each APOD can be fullscreened by tapping on it. The application also allows users to favorite an APOD to view at any time in their account page. Users can also comment on APODs as well as reply to other users underneath the explanation section.
 
-This application is just a side project of mine as I wanted to gain more exposure in mobile development including React Native, Expo, and REST APIs.
+Note: You do not have to create an account to use the app. Creating an account just enables you to favorite APODs and create comments, but you can still view APODs without an account.
+
+The main reason I built this application was simply to gain more exposure mobile and full stack development.
 
 ## Stellar Archive Demo
 
-Note: I plan on updating this video soon as the UI has changed quite a bit and there are many more features as well.
+Note: I will be updating this video shortly as the app looks very different now and has more functions.
 [![Stellar Archive Demo](https://img.youtube.com/vi/gV4Tb_dCWro/0.jpg)](https://youtu.be/gV4Tb_dCWro)
+
+## Architecture / Technologies Used
+
+- Languages:
+  - **TypeScript:** frontend
+  - **JavaScript:** lambda functions
+  - **SQL:** querying the database
+- Frontend:
+  - **React Native:** UI
+  - **Expo:** routing between screens
+- Backend:
+  - **AWS**
+    - **API Gateway:** used to create HTTP endpoints
+    - **Lambda:** used to proccess HTTP requests (GET, POST, DELETE)
+    - **Aurora and RDS:** used to create store the database
+    - **CloudWatch:** used to view logs and debug issues
+    - **Systems Manager:** used to store database login info
+  - Database
+    - **PostgreSQL:** the database itself
+    - **pgAdmin4:** to connect to and create/modify the database in AWS-RDS
+- Authorization
+  - **JWT:** used for authenticated requests that require a user to make (favoriting, commenting, etc.)
+  - **Bearer Token:** used for unauthenticated requests that do not require a user to make (registering, retrieval of APODs, etc.)
+- Development Tools
+  - **VSCode:** primary IDE
+  - **Git:** version control
+  - **Postman:** testing API endpoints
+  - **Expo Go:** mobile app testing and development
+  - **AI**
+    - **GitHub Copilot:** code completion and UI implementation assistance
+    - **Claude / Mistral/ OLMo / Microsoft Copilot:** helped with architectural decisions, debugging, and learning mobile development concepts
+
+## Repository Layout
+
+- app folder: contains all the screens their styles as well as the layout of the screens as requried by Expo.
+- database folder: contains files relating to the database such as a diagram of the schema and code used to create it and the database.
+- lambda_functions folder: contains the code I used for each lambda function in AWS. They are split up into 4 sub folders.
+  - apods folder: lambda functions for the APODs
+  - comments folder: lambda functions for the comments
+  - favorites folder: lambda functions for the favorites
+  - users folder: lambda functions for the users
+- src folder: everything else such as components, constants, stores, types, etc.
+  - components folder: contains UI components to not clutter screen code as much
+  - constants folder: constants used throughout the code.
+  - services folder: contains HTTP request code.
+  - store folder: contains a zustand store for the APOD.
+  - types folder: various types I created and used (enums, interfaces).
+  - utils: contains various utility functions that are lengthy and used multiple times.
 
 ## Database Schema
 
@@ -15,7 +65,29 @@ Note: I plan on updating this video soon as the UI has changed quite a bit and t
 
 ## Database Info
 
-I came up with the schema first using dbdiagram.io. I then made a PostgreSQL RDS in AWS based on that schema. I wrote the SQL to create the tables and used pgAdmin4 to actually create the tables with the SQL. See "database" folder and "docs" folder for the SQL and schema. I then made the API Gateways and Lambda functions in AWS to communicate with the RDS.
+After building the application logic for displaying and swiping through the APODs, I came up with the schema first using dbdiagram.io. I then createrd the PostgreSQL database in AWS-RDS based on that schema. I used pgAdmin4 to write the SQL create the tables. See "database" folder for the SQL and schema. After that, I made the API Gateways and Lambda functions in AWS to communicate with the RDS.
+
+The database consists of 4 tables:
+
+- users: to store the username and password of the users
+- apods: to store the relevant picture information retrieved from NASA's API
+- favorites: to store a a favorite APOD of the user's
+- comments: to store comments made by users on an APOD
+
+## Future Improvements
+
+I will likely not come back to the application as I would like to end my AWS trial. Having said that, I figured I should include a list of things that could improve the app if added.
+
+- Ability for user's to view their comments in their account page
+  - Ability for users to click on their comments in their account page and be taken directly to the APOD and the comment
+- Allow display of other media other than just images
+  - Some APODs are actually videos, which the app detects and automatically skips those days when user's come across them
+- General performance improvements
+  - Retrieval of APODs could be smoother. Sometimes I can see the corner of the image change when it is mostly off screen before the new one comes in.
+
+## Issues
+
+- The biggest issue is that NASA's endpoint will sometimes take too long to respond and it will timeout. I verified this by navigating to the endpoint in a browser to ensure it wasn't just my code. I somewhat work around this by caching APODs in my database, so whenever a user swipes to a new APOD, I will first check to see if it is within my database, if it's not there, then I attempt to retrieve the APOD from NASA.
 
 ## Prerequisites
 
@@ -33,27 +105,33 @@ I came up with the schema first using dbdiagram.io. I then made a PostgreSQL RDS
 2. **Install dependencies**
    Run the following command to install all required packages:
 
-`npm install`
+   `npm install`
 
 3. **Get a NASA API Key**
 
-Sign up for a free API key from [NASA’s API portal](https://api.nasa.gov/).
-Once you receive your key, create a .env file in the root directory of the project.
+   Sign up for a free API key from [NASA’s API portal](https://api.nasa.gov/).
+   Once you receive your key, create a .env file in the root directory of the project.
 
 4. **Configure the .env file**
 
-Add your NASA API key to the .env file using the following format:
+   Add your NASA API key to the .env file using the following format:
 
-`EXPO_PUBLIC_NASA_API_KEY=your_nasa_api_key_here`
+   `EXPO_PUBLIC_NASA_API_KEY=your_nasa_api_key_here`
 
-Refer to the .env.example file for guidance.
+   Refer to the .env.example file for guidance.
+
+   Note: Environment variables (including JWT secrets, service tokens, and AWS endpoints) are not included in the repository for security reasons. Anyone wishing to run the backend locally will need to supply their own AWS credentials and environment configuration.
 
 5. **Start the app**
    Launch the app with:
 
-`npx expo start`
+   `npx expo start`
 
-This will start the Expo development server. Follow the prompts to run the app on your device or emulator. I personally used Expo Go.
+   This will start the Expo development server. Follow the prompts to run the app on your device or emulator. I personally used Expo Go.
+
+   Note: You may need to set your execution policy to run the above command. You can do that by running the following
+
+   `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
 
 # Expo Information
 

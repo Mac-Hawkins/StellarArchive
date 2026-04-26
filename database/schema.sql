@@ -1,36 +1,38 @@
-// Used DBML to define database structure
-// Docs: https://dbml.dbdiagram.io/docs
+-- SERIAL for auto-incrementing IDs 
+-- FOREIGN KEY defines relationships
+-- TEXT for long text fields
 
-Table users {
-  id serial [primary key, not null]
-  username varchar [not null]
-  password varchar [not null]
-}
+-- I ran this script in pgAdmin while it was connected
+-- to the AWS server.
 
-Table apods {
-  id serial [primary key, not null]
-  date date [not null]
-  title varchar
-  image_url varchar [not null]
-  explanation text
-}
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
 
-Table favorites {
-  id serial [primary key, not null]
-  user_id integer [not null]
-  apod_id integer [not null]
-}
+CREATE TABLE apods (
+    date DATE PRIMARY KEY,
+    title VARCHAR(255),
+    image_url VARCHAR(500),
+    explanation TEXT
+);
 
-Table comments {
-  id serial [primary key, not null]
-  parent_comment_id integer
-  created_at timestamp [not null]
-  message text [not null]
-  user_id integer [not null]
-  apod_id integer [not null]
-}
+CREATE TABLE favorites (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    apod_date DATE NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (apod_date) REFERENCES apods(date)
+);
 
-Ref: comments.user_id > users.id // Many comments to one user
-Ref: comments.apod_id > apods.id // Many comments to one apod
-Ref: favorites.user_id > users.id // Many favorites to one user
-Ref: favorites.apod_id > apods.id // Many favorites to one apod
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    parent_comment_id INTEGER
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    message TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
+    apod_date DATE NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (apod_date) REFERENCES apods(date)
+);

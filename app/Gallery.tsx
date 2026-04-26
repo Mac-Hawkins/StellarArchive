@@ -3,6 +3,9 @@ import { ApodFullScreenModal } from "@/src/components/ApodFullScreenModal";
 import { DatePicker } from "@/src/components/DatePicker";
 import { ExplanationBottomSheet } from "@/src/components/ExplanationBottomSheet";
 import { ExplanationIndicator } from "@/src/components/ExplanationIndicator";
+import { fetchApodsFromBackendOrNasa } from "@/src/services/apods";
+import { getComments, postComment } from "@/src/services/comments";
+import { deleteFavorite, postFavorite } from "@/src/services/favorites";
 import { Feather, Fontisto, Ionicons } from "@expo/vector-icons";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
@@ -24,16 +27,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import {
-  API_KEY,
-  AWS_APODS_ENDPOINT,
-  AWS_AUTHORIZATION,
-  AWS_BASE_URL,
-  AWS_COMMENTS_ENDPOINT,
-  AWS_FAVORITES_ENDPOINT,
-  AWS_USERS_ENDPOINT,
-  SCREEN_WIDTH,
-} from "../src/constants/config";
+import { SCREEN_WIDTH } from "../src/constants/config";
 import { useApodStore } from "../src/store/ApodStore";
 import { SwipeDirection } from "../src/types/enums/SwipeDirection";
 import { ToastType } from "../src/types/enums/ToastType";
@@ -185,16 +179,10 @@ export default function Gallery() {
     if (!isUserLoggedIn) {
       showToast("Please log in to favorite APODs!", ToastType.INFO, "center");
     } else if (isApodFavorited) {
-      const deleteFavoriteResp = await fetch(
-        AWS_BASE_URL +
-          `${AWS_USERS_ENDPOINT}/${params.userId}${AWS_FAVORITES_ENDPOINT}/${favoriteId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${params.userToken}`,
-          },
-        },
+      const deleteFavoriteResp = await deleteFavorite(
+        params.userId,
+        params.userToken,
+        favoriteId,
       );
 
       if (!deleteFavoriteResp.ok) {
@@ -210,21 +198,12 @@ export default function Gallery() {
         setUserFavorites(newFavorites);
       }
     } else {
-      const apod_id = apod?.id.toString();
+      const apodId = apod?.id.toString();
 
-      const postFavoriteResp = await fetch(
-        AWS_BASE_URL +
-          `${AWS_USERS_ENDPOINT}/${params.userId}${AWS_FAVORITES_ENDPOINT}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${params.userToken}`,
-          },
-          body: JSON.stringify({
-            apod_id,
-          }),
-        },
+      const postFavoriteResp = await postFavorite(
+        params.userId,
+        params.userToken,
+        apodId,
       );
 
       if (!postFavoriteResp.ok) {
@@ -252,23 +231,12 @@ export default function Gallery() {
   ) => {
     // POST the comment to the apod.
     try {
-      const commentsResponse = await fetch(
-        AWS_BASE_URL +
-          `${AWS_APODS_ENDPOINT}` +
-          `/${apod?.id}` +
-          `${AWS_COMMENTS_ENDPOINT}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${params.userToken}`,
-          },
-          body: JSON.stringify({
-            userId: params.userId,
-            message: comment,
-            parentCommentId: parentCommentId, // This can be null if it's a top-level comment, or it can be the id of the comment being replied to for nested comments.
-          }),
-        },
+      const commentsResponse = await postComment(
+        apod?.id,
+        params.userId,
+        params.userToken,
+        comment,
+        parentCommentId,
       );
 
       if (!commentsResponse.ok) {
@@ -414,28 +382,10 @@ export default function Gallery() {
   const isSheetOpen = useApodStore((state) => state.isSheetOpen);
 
   const getCommentsForApod = async (apodId: number) => {
-    try {
-      const commentsResponse = await fetch(
-        AWS_BASE_URL +
-          `${AWS_APODS_ENDPOINT}` +
-          `/${apodId}` +
-          `${AWS_COMMENTS_ENDPOINT}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `${AWS_AUTHORIZATION}`,
-          },
-        },
-      );
-      const commentsData = await commentsResponse.json();
-      setCommentsLoaded(true); // Set commentsLoaded to true after we've fetched the comments for the current APOD.
-      setApodComments(commentsData); // Store the comments for the current APOD in state so we can display them in the bottom sheet.
-      return commentsData;
-    } catch (error) {
-      console.error("Error fetching comments for APOD.");
-      return null;
-    }
+    const commentsData = await getComments(apodId);
+    setCommentsLoaded(true); // Set commentsLoaded to true after we've fetched the comments for the current APOD.
+    setApodComments(commentsData); // Store the comments for the current APOD in state so we can display them in the bottom sheet.
+    return commentsData;
   };
 
   // useEffect that runs everytime isSheetOpen changes.
@@ -511,78 +461,10 @@ export default function Gallery() {
     );
   }, []); // Only start when the component originally mounts.
 
-  const fetchApodsFromBackendOrNasa = async (date: string) => {
+  const requestApods = async (date: string): Promise<Apod | null> => {
     let data = null;
     try {
-      let apodWasFetchedFromBackend = false; // Flag to track if we successfully fetched the APOD from the backend cache.
-
-      // Try getting the APOD first from the backend to see if we have it cached there from a previous fetch. If not, then fetch from the NASA API.
-      let apodResponse = await fetch(
-        AWS_BASE_URL + `${AWS_APODS_ENDPOINT}` + `/${date}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `${AWS_AUTHORIZATION}`,
-          },
-        },
-      );
-
-      if (!apodResponse.ok) {
-        console.log("APOD not found in backend cache, fetching from NASA API.");
-        // Get the APOD based on the date passed as a parameter in the URL. If no date is passed, default to today's APOD.
-        apodResponse = await fetch(
-          `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${date}`,
-        );
-      } else {
-        apodWasFetchedFromBackend = true;
-      }
-
-      // Should retrieve the APOD in JSON.
-      data = await apodResponse.json();
-
-      // If we successfully fetched the APOD from the NASA API (i.e., it wasn't cached on the backend),
-      // then cache it on the backend for future use.
-      if (!apodWasFetchedFromBackend) {
-        let { title, url, explanation } = data;
-        let image_url = url; // Rename url to image_url for clarity when caching on the backend.
-        data["image_url"] = url; // Add image_url field to the data object for caching on the backend.
-        // Cache the APOD on the backend.
-        const postApodResponse = await fetch(
-          AWS_BASE_URL + `${AWS_APODS_ENDPOINT}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `${AWS_AUTHORIZATION}`,
-            },
-            body: JSON.stringify({
-              date,
-              title,
-              image_url,
-              explanation,
-            }),
-          },
-        );
-
-        // Retrieve the APOD again from the backend to get the id added by the backend,
-        // and to ensure consistency in the data structure we are using throughout the app.
-        // TODO: We could optimize this by having the backend return the cached APOD data in the response when we cache it, so we don't have to make a second fetch request to get the same data right after caching it.
-        if (!postApodResponse.ok) {
-          console.log("Error caching APOD on backend.");
-        } else {
-          // Add the id from the backend to the data object so we can use it for favoriting and other operations that require the APOD id.
-          const temp = await postApodResponse.json();
-          data["id"] = temp.id;
-          data["title"] = title;
-          data["explanation"] = explanation;
-          data["image_url"] = image_url;
-        }
-      } else {
-        data = data.message[0];
-        const dateOnly = data.date.slice(0, 10);
-        data.date = dateOnly; // Format the date to only include the date portion (YYYY-MM-DD) for consistency and display purposes.
-      }
+      data = await fetchApodsFromBackendOrNasa(date);
     } catch (error) {
       translateX.value = 0;
       console.error("Error fetching data");
@@ -597,7 +479,7 @@ export default function Gallery() {
 
   const fetchApods = async () => {
     setIsApodShown(false);
-    let data: any = await fetchApodsFromBackendOrNasa(date);
+    let data: any = await requestApods(date);
 
     try {
       // Make a loop to skip any APODs that aren't images (e.g., videos) and fetch the next one until we find an
@@ -621,7 +503,7 @@ export default function Gallery() {
             ? incrementDate(date)
             : decrementDate(date);
 
-        data = await fetchApodsFromBackendOrNasa(date);
+        data = await requestApods(date);
         i++;
       }
 

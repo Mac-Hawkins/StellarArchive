@@ -1,8 +1,4 @@
-import {
-  AWS_BASE_URL,
-  AWS_FAVORITES_ENDPOINT,
-  AWS_USERS_ENDPOINT,
-} from "@/src/constants/config";
+import { getFavorites } from "@/src/services/favorites";
 import { Entypo, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -58,16 +54,9 @@ export default function LoginScreen() {
   // Fetch all user favorites once and build a map for O(1) lookup
   const fetchUserFavoritesMap = async () => {
     try {
-      const getFavoriteResp = await fetch(
-        AWS_BASE_URL +
-          `${AWS_USERS_ENDPOINT}/${params.userId}${AWS_FAVORITES_ENDPOINT}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${params.userToken}`,
-          },
-        },
+      const getFavoriteResp = await getFavorites(
+        params.userId,
+        params.userToken,
       );
 
       const data = await getFavoriteResp.json();
