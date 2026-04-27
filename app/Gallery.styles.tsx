@@ -20,6 +20,8 @@ const GalleryStyles = StyleSheet.create({
     alignItems: "center",
     padding: 10,
     backgroundColor: "black",
+    borderBottomColor: "white",
+    borderBottomWidth: 1,
   },
   viewCenterIconWrapper: {
     position: "absolute",

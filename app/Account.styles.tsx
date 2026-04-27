@@ -7,6 +7,8 @@ const AccountStyles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
     backgroundColor: "black",
+    borderBottomColor: "white",
+    borderBottomWidth: 1,
   },
   viewCenterIconWrapper: {
     position: "absolute",

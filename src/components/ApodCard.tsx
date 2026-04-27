@@ -16,8 +16,9 @@ export const ApodCard = ({ apod, onOpen, onLoadEnd }: ApodCardProps) => {
   return (
     <View style={GalleryStyles.containerApodView}>
       {/* The title of the APOD image */}
-      <View style={{ alignItems: "center", marginTop: 10 }}>
+      <View style={{ alignItems: "center", marginTop: 20 }}>
         <Text style={GalleryStyles.textApodTitle}>{apod?.title}</Text>
+        <Text style={GalleryStyles.textDate}>({apod?.date})</Text>
       </View>
 
       {/* APOD image (centered) */}
@@ -31,10 +32,6 @@ export const ApodCard = ({ apod, onOpen, onLoadEnd }: ApodCardProps) => {
         </TouchableWithoutFeedback>
       </View>
 
-      {/* The date of the APOD image */}
-      <View style={{ alignItems: "center" }}>
-        <Text style={GalleryStyles.textDate}>{apod?.date}</Text>
-      </View>
       <Toast />
     </View>
   );

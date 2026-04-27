@@ -226,7 +226,13 @@ export default function LoginScreen() {
             }
             keyExtractor={(item) => item.apodId.toString()}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => onPressFavoriteItem(item)}>
+              <TouchableOpacity
+                onPress={() => onPressFavoriteItem(item)}
+                style={{
+                  borderBottomColor: "white",
+                  borderBottomWidth: 1,
+                }}
+              >
                 <Text style={AccountStyles.itemText}>{item.fav.title}</Text>
               </TouchableOpacity>
             )}
