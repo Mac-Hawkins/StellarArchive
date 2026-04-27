@@ -18,7 +18,7 @@ export const ApodCard = ({ apod, onOpen, onLoadEnd }: ApodCardProps) => {
       {/* The title of the APOD image */}
       <View style={{ alignItems: "center", marginTop: 20 }}>
         <Text style={GalleryStyles.textApodTitle}>{apod?.title}</Text>
-        <Text style={GalleryStyles.textDate}>({apod?.date})</Text>
+        <Text style={GalleryStyles.textDate}>{apod?.date}</Text>
       </View>
 
       {/* APOD image (centered) */}

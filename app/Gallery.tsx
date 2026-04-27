@@ -78,8 +78,7 @@ export default function Gallery() {
   );
   const [isApodFavorited, setIsApodFavorited] = useState(false); // Needs to be a state variable so that the component re-renders when the user favorites or un-favorites an APOD to update the color of the star icon.
   const [favoriteId, setFavoriteId] = useState<number | null>(null); // Store the id of the favorite entry for this APOD so we can delete it if the user un-favorites the APOD.
-  // State to disable buttons while login request is in flight to prevent multiple requests.
-  const [disableFavoriteIcon, setDisableFavoriteIcon] = useState(false);
+  const [disableFavoriteIcon, setDisableFavoriteIcon] = useState(false); // State to disable buttons while login request is in flight to prevent multiple requests.
   const [apodComments, setApodComments] = useState([]); // State variable to store the comments for the current APOD.
   const [commentsLoaded, setCommentsLoaded] = useState(false); // State variable to track whether we've loaded the comments for the current APOD yet. This is important because we want to make sure to fetch the comments from the backend when we open the explanation sheet, and we don't want to fetch them multiple times if the user opens and closes the sheet multiple times for the same APOD.
 

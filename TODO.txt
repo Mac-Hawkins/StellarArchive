@@ -3,19 +3,17 @@ TODO
 Features
 
     Frontend
-        - Add loading text when waiting for an image to load.
         - Shrink the APOD, and APOD title when the explanation is brought up.
-        - Implement favorite, comments, and search functions.
-        - Add UI to add comments.
-        - Make another option for users to see their comments.        
+        - Make another option for users to see their comments.   
+        - Sign out text might be off center from icon.     
 
     Backend
         - Maybe change the created_at col in comments to a date datatype instead of timestamp.
         - Maybe clean up the lambda functions a bit.
 
     Bugs
-        - It looks like I'm somehow triggering 2 calls for each APOD.
         - There appears to be an issue with NASA's server for retrieving the APODs now. They did have a disclaimer about it before, but it worked fine then.
             - I'm working around this by storing each apod retrieved in my database and attempting to retrieve it from there first.
-        - Move the ApodFullScreenModal to the ApodCard so the user can only enlarge the image by clicking on it, not on the space between the image and title and date.
-            This would involve moving the onClose function to the ApodCard as a parameter, just like the onOpen one is currently.
+        - The toast for when comments are posted is showing up behind the bottom sheet when it should be in front.
+        - Posting a reply to a comment seems to take too long.
+        - "Loading..." text doesn't always appear in the Gallery when starting the app.

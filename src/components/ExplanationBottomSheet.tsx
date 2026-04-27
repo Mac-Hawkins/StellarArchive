@@ -150,7 +150,13 @@ export const ExplanationBottomSheet = ({
           };
         }) => (
           // The comments section
-          <View style={{ marginBottom: 20 }}>
+          <View
+            style={{
+              marginBottom: 20,
+              borderTopColor: "white",
+              borderTopWidth: 1,
+            }}
+          >
             {item.isReply && (
               <View
                 style={{

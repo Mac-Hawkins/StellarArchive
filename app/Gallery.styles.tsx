@@ -72,7 +72,7 @@ const GalleryStyles = StyleSheet.create({
   },
   textLoading: { color: "white" },
   textDate: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
     width: "100%",
@@ -104,6 +104,8 @@ const GalleryStyles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
     color: "white",
+    borderTopColor: "white",
+    borderTopWidth: 1,
   },
   textExplanation: {
     fontSize: 18,

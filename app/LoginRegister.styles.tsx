@@ -23,8 +23,8 @@ const loginRegisterStyles = StyleSheet.create({
     fontWeight: "bold",
     color: "white",
   },
-  linkRegister: { color: "blue", fontWeight: "bold", fontSize: 18 },
-  textRegister: { fontSize: 18, fontWeight: "bold", color: "blue" },
+  linkRegister: { color: "#3B82F6", fontWeight: "bold", fontSize: 18 },
+  textRegister: { fontSize: 18, fontWeight: "bold" },
   viewTouchableOpacity: { alignItems: "center", marginTop: 50 },
   textTouchableOpacity: { fontSize: 18, fontWeight: "bold" },
 });
