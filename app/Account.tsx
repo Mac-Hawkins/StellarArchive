@@ -157,22 +157,26 @@ export default function LoginScreen() {
             alignItems: "center",
             backgroundColor: backToGalleryTabSelected ? "gray" : "transparent",
             borderRadius: 5,
+            width: 75,
           }}
         >
           <Entypo name="image" size={32} color="white" />
           <Text style={AccountStyles.pressableTextStyle}>Back to Gallery</Text>
         </Pressable>
-        <Pressable
-          onPress={() => OnPressFavoritesIcon()}
-          style={{
-            alignItems: "center",
-            backgroundColor: favoritesTabSelected ? "gray" : "transparent",
-            borderRadius: 5,
-          }}
-        >
-          <Ionicons name="star-outline" size={32} color="white" />
-          <Text style={AccountStyles.pressableTextStyle}>Your Favorites</Text>
-        </Pressable>
+
+        <View style={AccountStyles.viewCenterIconWrapper}>
+          <Pressable
+            onPress={() => OnPressFavoritesIcon()}
+            style={{
+              alignItems: "center",
+              backgroundColor: favoritesTabSelected ? "gray" : "transparent",
+              borderRadius: 5,
+            }}
+          >
+            <Ionicons name="star-outline" size={32} color="white" />
+            <Text style={AccountStyles.pressableTextStyle}>Your Favorites</Text>
+          </Pressable>
+        </View>
 
         <Pressable
           onPress={() => onPressSignOut()}
@@ -180,6 +184,7 @@ export default function LoginScreen() {
             alignItems: "center",
             backgroundColor: signOutTabSelected ? "gray" : "transparent",
             borderRadius: 5,
+            width: 75,
           }}
         >
           <FontAwesome name="sign-out" size={32} color="white" />

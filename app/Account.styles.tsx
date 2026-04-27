@@ -4,8 +4,15 @@ const AccountStyles = StyleSheet.create({
   pressableViewStyle: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 10,
+    alignItems: "center",
+    paddingVertical: 10,
     backgroundColor: "black",
+  },
+  viewCenterIconWrapper: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    alignItems: "center",
   },
   pressableStyle: {
     alignItems: "center",

@@ -540,18 +540,20 @@ export default function Gallery() {
             <Ionicons name="person-circle-outline" size={32} color="white" />
             <Text style={GalleryStyles.pressableTextStyle}>Account</Text>
           </Pressable>
-          <Pressable onPress={() => setShowDatePicker(true)}>
-            <Fontisto name="date" size={32} color="white" />
+          <View style={GalleryStyles.viewCenterIconWrapper}>
+            <Pressable onPress={() => setShowDatePicker(true)}>
+              <Fontisto name="date" size={32} color="white" />
 
-            {/* The component for picking the date to go to. */}
-            <DatePicker
-              showDatePicker={showDatePicker}
-              datePicked={datePicked}
-              setShowDatePicker={() => setShowDatePicker(true)}
-              onDatePicked={onDatePicked}
-            />
-            <Text style={GalleryStyles.pressableTextStyle}>Date</Text>
-          </Pressable>
+              {/* The component for picking the date to go to. */}
+              <DatePicker
+                showDatePicker={showDatePicker}
+                datePicked={datePicked}
+                setShowDatePicker={() => setShowDatePicker(true)}
+                onDatePicked={onDatePicked}
+              />
+              <Text style={GalleryStyles.pressableTextStyle}>Date</Text>
+            </Pressable>
+          </View>
           <View style={GalleryStyles.viewFavorite}>
             <Pressable
               onPress={() => onPressFavorite(isUserLoggedIn)}

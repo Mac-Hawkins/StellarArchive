@@ -17,8 +17,15 @@ const GalleryStyles = StyleSheet.create({
   pressableViewStyle: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     padding: 10,
     backgroundColor: "black",
+  },
+  viewCenterIconWrapper: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    alignItems: "center",
   },
   pressableTextStyle: {
     fontSize: 8,
