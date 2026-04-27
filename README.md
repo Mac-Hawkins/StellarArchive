@@ -8,7 +8,6 @@ The main reason I built this application was simply to gain more exposure mobile
 
 ## Stellar Archive Demo
 
-Note: I will be updating this video shortly as the app looks very different now and has more functions.
 [![Stellar Archive Demo](https://img.youtube.com/vi/HWR48eu5A4g/0.jpg)](https://youtu.be/HWR48eu5A4g)
 
 ## Architecture / Technologies Used
