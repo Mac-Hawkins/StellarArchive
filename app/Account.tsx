@@ -10,15 +10,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { getToken, getUserId, isLoggedIn, logout } from "../src/utils/JwtUtils";
 import AccountStyles from "./Account.styles";
 
 // Entry point of application. This is the first screen that users see when they open the app.
 export default function LoginScreen() {
   const params = useLocalSearchParams();
 
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(
-    params.userId !== undefined, // If we got to this screen then this should definitely be true.
-  );
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
   // useStates to track which tab is selected in the user home screen.
   // Only one can be selected at a time, and the selected tab will be highlighted in the UI.
@@ -40,6 +39,15 @@ export default function LoginScreen() {
       : undefined,
   ); // Map of apod_id => favorite_id for quick lookups without API calls
 
+  // Use effect for updating whether user is logged in or not via existence of JWT.
+  useEffect(() => {
+    async function checkLogin() {
+      setIsUserLoggedIn(await isLoggedIn());
+    }
+
+    checkLogin();
+  }, []); // Runs once on first render.
+
   // Fetch user's favorites list once when they log in to avoid repeated API calls
   useEffect(() => {
     if (isUserLoggedIn) {
@@ -54,8 +62,8 @@ export default function LoginScreen() {
   const fetchUserFavoritesMap = async () => {
     try {
       const getFavoriteResp = await getFavorites(
-        params.userId,
-        params.userToken,
+        await getUserId(),
+        await getToken(),
       );
 
       const data = await getFavoriteResp.json();
@@ -106,6 +114,7 @@ export default function LoginScreen() {
         {
           text: "Yes",
           onPress: () => {
+            logout();
             setUserFavorites({}); // Clear favorites if user logs out
             // Just return to Gallery with no user token.
             router.push({
@@ -124,8 +133,6 @@ export default function LoginScreen() {
     router.push({
       pathname: "./Gallery",
       params: {
-        userToken: params.userToken,
-        userId: params.userId,
         userFavorites: JSON.stringify(userFavorites),
         selectedApod: JSON.stringify(item.fav), // Pass the selected APOD data to the Gallery screen to display it in the bottom sheet.
       },
@@ -141,8 +148,6 @@ export default function LoginScreen() {
     router.push({
       pathname: "./Gallery",
       params: {
-        userToken: params.userToken,
-        userId: params.userId,
         userFavorites: JSON.stringify(userFavorites),
       },
     });

@@ -1,8 +1,7 @@
 import {
-    AWS_APODS_ENDPOINT,
-    AWS_AUTHORIZATION,
-    AWS_BASE_URL,
-    AWS_COMMENTS_ENDPOINT,
+  AWS_APODS_ENDPOINT,
+  AWS_BASE_URL,
+  AWS_COMMENTS_ENDPOINT,
 } from "../constants/config";
 
 export async function getComments(apodId: number) {
@@ -16,7 +15,6 @@ export async function getComments(apodId: number) {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `${AWS_AUTHORIZATION}`,
         },
       },
     );
@@ -31,7 +29,7 @@ export async function getComments(apodId: number) {
 export async function postComment(
   apodId: number | undefined,
   userId: string | string[],
-  userToken: string | string[],
+  userToken: string | null,
   comment: string,
   parentCommentId: number | null,
 ) {

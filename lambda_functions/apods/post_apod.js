@@ -2,6 +2,9 @@
 const { SSMClient, GetParametersCommand } = require("@aws-sdk/client-ssm");
 const { Client } = require("pg");
 
+// I'M DEPRECATING THIS AS THE GET APOD REQUEST WILL NOW DO THE POST
+// DIRECTLY IF RETRIEVED FROM NASA. MAY DELETE.
+
 exports.handler = async (event) => {
   let errorSsm = "";
   let dbClient;

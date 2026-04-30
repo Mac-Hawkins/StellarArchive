@@ -153,8 +153,6 @@ export const ExplanationBottomSheet = ({
           <View
             style={{
               marginBottom: 20,
-              borderTopColor: "white",
-              borderTopWidth: 1,
             }}
           >
             {item.isReply && (

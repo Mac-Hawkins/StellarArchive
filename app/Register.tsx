@@ -2,9 +2,9 @@ import { registerUser } from "@/src/services/users";
 import { ToastType } from "@/src/types/enums/ToastType";
 import { showToast } from "@/src/utils/ToastMessages";
 import { useRouter } from "expo-router";
-import { jwtDecode } from "jwt-decode";
 import React, { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { saveToken } from "../src/utils/JwtUtils";
 import loginRegisterStyles from "./LoginRegister.styles";
 
 export default function LoginScreen() {
@@ -52,11 +52,9 @@ export default function LoginScreen() {
       if ("message" in data && data.message.includes("User created")) {
         showToast("Register successful!", ToastType.SUCCESS, "center");
         const token = data.token;
-        const decoded: any = jwtDecode(token);
-        const userId = decoded.userId;
+        await saveToken(token);
         router.push({
           pathname: "./Account",
-          params: { userToken: token, userId: userId },
         });
       } else if (
         "error" in data &&

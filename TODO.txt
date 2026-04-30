@@ -6,6 +6,8 @@ Features
         - Shrink the APOD, and APOD title when the explanation is brought up.
         - Make another option for users to see their comments.   
         - Sign out text might be off center from icon.     
+        - Maybe turn index.tsx into a screen that lets the user press a button to enter into the app instead of using the gallery.
+        - Add display of copyright.
 
     Backend
         - Maybe change the created_at col in comments to a date datatype instead of timestamp.

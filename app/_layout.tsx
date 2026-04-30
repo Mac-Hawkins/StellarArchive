@@ -10,6 +10,18 @@ export default function RootLayout() {
     <>
       <View style={{ flex: 1, backgroundColor: "black" }}>
         <Stack>
+          {/* Same as Gallery but needed as an entry point for the app. */}
+          <Stack.Screen
+            name="index"
+            options={{
+              headerTitle: "Astronomy Picture of the Day",
+              headerTitleStyle: { fontSize: 24, fontWeight: "bold" },
+              headerTitleAlign: "center", // This centers the title
+              headerBackVisible: false, // Hides the back button on the index screen
+              headerStyle: { backgroundColor: "#acacc7" },
+              gestureEnabled: true, // Enable swipe gestures
+            }}
+          />
           <Stack.Screen
             name="Gallery"
             options={{

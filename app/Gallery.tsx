@@ -3,9 +3,10 @@ import { ApodFullScreenModal } from "@/src/components/ApodFullScreenModal";
 import { DatePicker } from "@/src/components/DatePicker";
 import { ExplanationBottomSheet } from "@/src/components/ExplanationBottomSheet";
 import { ExplanationIndicator } from "@/src/components/ExplanationIndicator";
-import { fetchApodsFromBackendOrNasa } from "@/src/services/apods";
+import { fetchApodsFromBackend } from "@/src/services/apods";
 import { getComments, postComment } from "@/src/services/comments";
 import { deleteFavorite, postFavorite } from "@/src/services/favorites";
+import { getToken, getUserId, isLoggedIn } from "@/src/utils/JwtUtils";
 import { Feather, Fontisto, Ionicons } from "@expo/vector-icons";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
@@ -68,9 +69,7 @@ export default function Gallery() {
   const [datePicked, setDatePicked] = useState(new Date()); // State variable to store the date selected from the date picker. Defaults to current date.
   const [isFullScreen, setIsFullScreen] = useState(false); // State variable to track whether the APOD image is in full screen mode or not.
   const closeSheet = useApodStore((state) => state.closeSheet); // getter for close explanation sheet state var.
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(
-    params.userId !== undefined,
-  );
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [userFavorites, setUserFavorites] = useState(
     params.userFavorites !== undefined
       ? JSON.parse(params.userFavorites as string)
@@ -111,6 +110,15 @@ export default function Gallery() {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
 
+  // Use effect for updating whether user is logged in or not via existence of JWT.
+  useEffect(() => {
+    async function checkLogin() {
+      setIsUserLoggedIn(await isLoggedIn());
+    }
+
+    checkLogin();
+  }, []); // Runs once on first render.
+
   // Handle selectedApod from URL params (when user clicks a favorite from Account)
   useEffect(() => {
     if (selectedApod) {
@@ -143,11 +151,6 @@ export default function Gallery() {
     return () => StatusBar.setHidden(false);
   }, [isFullScreen]);
 
-  // Update isUserLoggedIn when params change (e.g., when user logs in/out)
-  useEffect(() => {
-    setIsUserLoggedIn(params.userId !== undefined);
-  }, [params.userId]);
-
   // Update favorite status whenever apod or userFavorites changes
   useEffect(() => {
     if (apod) {
@@ -165,8 +168,6 @@ export default function Gallery() {
       router.push({
         pathname: "./Account",
         params: {
-          userToken: params.userToken,
-          userId: params.userId,
           userFavorites: JSON.stringify(userFavorites),
         },
       });
@@ -179,8 +180,8 @@ export default function Gallery() {
       showToast("Please log in to favorite APODs!", ToastType.INFO, "center");
     } else if (isApodFavorited) {
       const deleteFavoriteResp = await deleteFavorite(
-        params.userId,
-        params.userToken,
+        await getUserId(),
+        await getToken(),
         favoriteId,
       );
 
@@ -200,8 +201,8 @@ export default function Gallery() {
       const apodId = apod?.id.toString();
 
       const postFavoriteResp = await postFavorite(
-        params.userId,
-        params.userToken,
+        await getUserId(),
+        await getToken(),
         apodId,
       );
 
@@ -231,8 +232,8 @@ export default function Gallery() {
     try {
       const commentsResponse = await postComment(
         apod?.id,
-        params.userId,
-        params.userToken,
+        await getUserId(),
+        await getToken(),
         comment,
         parentCommentId,
       );
@@ -462,15 +463,11 @@ export default function Gallery() {
   const requestApods = async (date: string): Promise<Apod | null> => {
     let data = null;
     try {
-      data = await fetchApodsFromBackendOrNasa(date);
+      data = await fetchApodsFromBackend(date);
     } catch (error) {
       translateX.value = 0;
       console.error("Error fetching data");
-      showToast(
-        "Not able to retrieve image data! Please try again later.",
-        ToastType.ERROR,
-        "center",
-      );
+      showToast("Not able to retrieve image data!", ToastType.ERROR, "center");
     }
     return data;
   };

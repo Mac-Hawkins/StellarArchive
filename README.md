@@ -31,7 +31,6 @@ The main reason I built this application was simply to gain more exposure mobile
     - **pgAdmin4:** to connect to and create/modify the database in AWS-RDS
 - Authorization
   - **JWT:** used for authenticated requests that require a user to make (favoriting, commenting, etc.)
-  - **Bearer Token:** used for unauthenticated requests that do not require a user to make (registering, retrieval of APODs, etc.)
 - Development Tools
   - **VSCode:** primary IDE
   - **Git:** version control
@@ -106,22 +105,7 @@ I will likely not come back to the application as I would like to end my AWS tri
 
    `npm install`
 
-3. **Get a NASA API Key**
-
-   Sign up for a free API key from [NASA’s API portal](https://api.nasa.gov/).
-   Once you receive your key, create a .env file in the root directory of the project.
-
-4. **Configure the .env file**
-
-   Add your NASA API key to the .env file using the following format:
-
-   `EXPO_PUBLIC_NASA_API_KEY=your_nasa_api_key_here`
-
-   Refer to the .env.example file for guidance.
-
-   Note: Environment variables (including JWT secrets, service tokens, and AWS endpoints) are not included in the repository for security reasons. Anyone wishing to run the backend locally will need to supply their own AWS credentials and environment configuration.
-
-5. **Start the app**
+3. **Start the app**
    Launch the app with:
 
    `npx expo start`
