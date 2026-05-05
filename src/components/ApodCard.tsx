@@ -1,6 +1,5 @@
 import GalleryStyles from "@/app/Gallery.styles";
 import { Image, Text, TouchableWithoutFeedback, View } from "react-native";
-import Toast from "react-native-toast-message";
 import { Apod } from "../types/interfaces/Apod";
 
 interface ApodCardProps {
@@ -31,8 +30,6 @@ export const ApodCard = ({ apod, onOpen, onLoadEnd }: ApodCardProps) => {
           />
         </TouchableWithoutFeedback>
       </View>
-
-      <Toast />
     </View>
   );
 };

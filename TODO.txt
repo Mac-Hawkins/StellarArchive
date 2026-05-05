@@ -3,19 +3,16 @@ TODO
 Features
 
     Frontend
-        - Shrink the APOD, and APOD title when the explanation is brought up.
         - Make another option for users to see their comments.   
-        - Sign out text might be off center from icon.     
         - Maybe turn index.tsx into a screen that lets the user press a button to enter into the app instead of using the gallery.
         - Add display of copyright.
 
     Backend
         - Maybe change the created_at col in comments to a date datatype instead of timestamp.
         - Maybe clean up the lambda functions a bit.
-
+        
     Bugs
         - There appears to be an issue with NASA's server for retrieving the APODs now. They did have a disclaimer about it before, but it worked fine then.
             - I'm working around this by storing each apod retrieved in my database and attempting to retrieve it from there first.
-        - The toast for when comments are posted is showing up behind the bottom sheet when it should be in front.
         - Posting a reply to a comment seems to take too long.
         - "Loading..." text doesn't always appear in the Gallery when starting the app.

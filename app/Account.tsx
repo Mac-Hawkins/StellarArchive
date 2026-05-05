@@ -1,5 +1,5 @@
 import { getFavorites } from "@/src/services/favorites";
-import { Entypo, FontAwesome, Ionicons } from "@expo/vector-icons";
+import { Entypo, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -176,6 +176,7 @@ export default function LoginScreen() {
               alignItems: "center",
               backgroundColor: favoritesTabSelected ? "gray" : "transparent",
               borderRadius: 5,
+              width: 75,
             }}
           >
             <Ionicons name="star-outline" size={32} color="white" />
@@ -192,7 +193,8 @@ export default function LoginScreen() {
             width: 75,
           }}
         >
-          <FontAwesome name="sign-out" size={32} color="white" />
+          <FontAwesome5 name="sign-out-alt" size={32} color="white" />
+
           <Text style={AccountStyles.pressableTextStyle}>Sign Out</Text>
         </Pressable>
       </View>
