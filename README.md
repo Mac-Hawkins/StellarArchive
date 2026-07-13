@@ -38,7 +38,7 @@ The main reason I built this application was simply to gain more exposure mobile
   - **Expo Go:** mobile app testing and development
   - **AI**
     - **GitHub Copilot:** code completion and UI implementation assistance
-    - **Claude / Mistral/ OLMo / Microsoft Copilot:** helped with architectural decisions, debugging, and learning mobile development concepts
+    - **Claude / Mistral / OLMo / Microsoft Copilot:** helped with architectural decisions, debugging, and learning mobile development concepts
 
 ## Repository Layout
 
@@ -69,13 +69,15 @@ The database consists of 4 tables:
 
 - users: to store the username and password of the users
 - apods: to store the relevant picture information retrieved from NASA's API
-- favorites: to store a a favorite APOD of the user's
+- favorites: to store a favorite APOD of the user's
 - comments: to store comments made by users on an APOD
 
 ## Future Improvements
 
 I will likely not come back to the application as I would like to end my AWS trial. Having said that, I figured I should include a list of things that could improve the app if added.
 
+- A script to run over night to query NASA (< 100 times) to collect APODs to insert into my DB.
+- Move configureDbConnection to its own Lambda function. I didn't realize until the end of the project that you can call lambda functions from other lambda functions.
 - Ability for user's to view their comments in their account page
   - Ability for users to click on their comments in their account page and be taken directly to the APOD and the comment
 - Allow display of other media other than just images

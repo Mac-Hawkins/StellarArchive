@@ -56,5 +56,6 @@ app-example
 /ios
 /android
 
-# Folder of notes
+# Dev folders
 /my_notes
+/packages

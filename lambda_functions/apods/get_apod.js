@@ -4,6 +4,9 @@ const { LambdaClient, InvokeCommand } = require("@aws-sdk/client-lambda");
 const { Client } = require("pg");
 
 exports.handler = async (event) => {
+  //==================================
+  // INITIALIZE DATABASE CONNECTION
+  //==================================
   let errorSsm = "";
   let dbClient;
   [dbClient, errorSsm] = await configureDbConnection();
@@ -16,49 +19,86 @@ exports.handler = async (event) => {
     };
   }
 
-  // Keep this date because I want to get the APOD by date based on how they swipe. Don't change to ID.
+  //==================================
+  // EXTRACT THE APOD DATE AND INITIALIZE VARIABLES.
+  //==================================
+
   const apodDate = event.pathParameters.apodDate;
 
   let errorMsg;
-  let apodResp = null;
+  let dbResp = null;
   let apodData = null;
   let wasFound = false;
+
   try {
-    // Try getting APOD from data base first.
+    //==================================
+    // ATTEMPT APOD RETRIEVAL FROM DB.
+    //==================================
+
+    // Try getting APOD from database first.
     await dbClient.connect();
-    apodResp = await dbClient.query("SELECT * FROM apods WHERE date = $1", [
+    dbResp = await dbClient.query("SELECT * FROM apods WHERE date = $1", [
       apodDate,
     ]);
 
-    // If a APOD was found, apodResp.rows[0].id will have the APOD's data
-    if (apodResp.rows && apodResp.rows.length > 0) {
-      apodData = apodResp.rows[0];
+    // If a APOD was found, dbResp.rows[0].id will have the APOD's data
+    if (dbResp.rows && dbResp.rows.length > 0) {
+      apodData = dbResp.rows[0];
       wasFound = true;
     } else {
-      const client = new LambdaClient({});
+      //==================================
+      // ATTEMPT APOD RETRIEVAL FROM NASA.
+      //==================================
+
       // Try getting APOD from NASA if unsuccessful.
-      const nasaResponse = await client.send(
+      const client = new LambdaClient({ region: process.env.MY_REGION });
+      const nasaResp = await client.send(
         new InvokeCommand({
           FunctionName: process.env.NASA_LAMBDA_NAME,
           Payload: JSON.stringify({ apodDate }),
         }),
       );
-      // If a APOD was retrieved, nasaResponse will have the APOD's data
-      if (nasaResponse != null) {
-        const raw = Buffer.from(nasaResponse.Payload);
+
+      // Apparently the LambdaClient can return a 200 status code and not throw and error even if the Lambda function itself failed,
+      // so we need to check for FunctionError as well.
+      if (nasaResp.FunctionError) {
+        throw new Error(
+          `Failed to retrieve APOD from NASA Lambda. Error: ${nasaResp.FunctionError}`,
+        );
+      }
+      // If a APOD was retrieved, nasaResp will have the APOD's data
+      if (nasaResp != null && nasaResp.Payload != null) {
+        const raw = Buffer.from(nasaResp.Payload);
         apodData = JSON.parse(raw.toString());
         wasFound = true;
 
-        // Record the APOD in my database
+        //==================================
+        // CACHE APOD.
+        //==================================
+
+        // Record the APOD in my database, do nothing if it already exists (ON CONFLICT DO NOTHING).
         const insertApodResult = await dbClient.query(
-          "INSERT INTO apods (date, title, image_url, explanation) " +
-            "VALUES ($1, $2, $3, $4) RETURNING *",
+          `INSERT INTO apods (date, title, image_url, explanation)
+            VALUES ($1, $2, $3, $4) 
+            ON CONFLICT (date) DO NOTHING
+            RETURNING *`,
           [apodData.date, apodData.title, apodData.url, apodData.explanation],
         );
 
-        // Reassign apodData to the new insertion in the database.
-        // This is to keep data fields consistent when returning.
-        apodData = insertApodResult.rows[0];
+        // Retrieve the APOD from the database if it wasn't able to be inserted, as it may have been inserted by another process.
+        // This is basically an edge case that I shouldn't encounter, but could happen if two or more users are swiping through the
+        // APODs at the same time and the APOD is not in the database yet.
+        if (insertApodResult.rows && insertApodResult.rows.length === 0) {
+          const existingApod = await dbClient.query(
+            "SELECT * FROM apods WHERE date = $1",
+            [apodDate],
+          );
+          apodData = existingApod.rows[0];
+        } else {
+          // Reassign apodData to the new insertion in the database.
+          // This is to keep data fields consistent when returning.
+          apodData = insertApodResult.rows[0];
+        }
       }
     }
   } catch (error) {
@@ -67,19 +107,27 @@ exports.handler = async (event) => {
     await dbClient.end();
   }
 
+  //==================================
+  // RETURN RESPONSE
+  //==================================
+
+  // Return 500 if there was an error with the database or NASA API.
   if (errorMsg) {
     return {
-      statusCode: 409,
+      statusCode: 500,
       body: JSON.stringify({ error: errorMsg }),
     };
   }
 
+  // APOD was found so return 200.
   if (wasFound) {
     return {
       statusCode: 200,
       body: JSON.stringify({ message: apodData }),
     };
-  } else {
+  }
+  // Else, APOD was not found so return 404.
+  else {
     return {
       statusCode: 404,
       body: JSON.stringify({ message: "APOD not found." }),
@@ -87,7 +135,7 @@ exports.handler = async (event) => {
   }
 };
 
-// Function to get SSM params and
+// Function to get SSM params and configure the database connection.
 async function configureDbConnection() {
   const input = {
     Names: [
@@ -102,19 +150,27 @@ async function configureDbConnection() {
 
   const dbParams = new GetParametersCommand(input);
 
-  const ssmClient = new SSMClient({ region: process.env.MY_REGION }); // put in env var
+  const ssmClient = new SSMClient({ region: process.env.MY_REGION });
 
   let client;
   let errorSsm;
   try {
     const data = await ssmClient.send(dbParams);
 
-    // Figure out why it comes in this order...
-    const dbHost = data.Parameters[0].Value;
-    const dbName = data.Parameters[1].Value;
-    const dbPassword = data.Parameters[2].Value;
-    const dbPort = data.Parameters[3].Value;
-    const dbUser = data.Parameters[4].Value;
+    // Initialize empty object
+    const params = {};
+
+    // Build lookup by name
+    data.Parameters.forEach((p) => {
+      params[p.Name] = p.Value;
+    });
+
+    // Get the values from the params object using the environment variable names
+    const dbHost = params[process.env.SSM_DB_HOST];
+    const dbName = params[process.env.SSM_DB_NAME];
+    const dbPassword = params[process.env.SSM_DB_PASSWORD];
+    const dbPort = params[process.env.SSM_DB_PORT];
+    const dbUser = params[process.env.SSM_DB_USER];
 
     // Create client connection to RDS.
     client = new Client({
@@ -125,7 +181,10 @@ async function configureDbConnection() {
       password: dbPassword,
     });
   } catch (error) {
-    //errorSsm = error.message; // Commented out because sometimes this returns login info depending on error...
+    console.error("Error retrieving SSM parameters.", error);
+    // Originally assigned this to error but sometimes it returned login info depending on error,
+    // so I changed it to a generic error message.
+    errorSsm = "Error retrieving SSM parameters.";
   } finally {
     return [client, errorSsm];
   }

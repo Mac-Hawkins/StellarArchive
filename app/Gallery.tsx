@@ -3,7 +3,7 @@ import { ApodFullScreenModal } from "@/src/components/ApodFullScreenModal";
 import { DatePicker } from "@/src/components/DatePicker";
 import { ExplanationBottomSheet } from "@/src/components/ExplanationBottomSheet";
 import { ExplanationIndicator } from "@/src/components/ExplanationIndicator";
-import { fetchApodsFromBackend } from "@/src/services/apods";
+import { fetchApod } from "@/src/services/apods";
 import { getComments, postComment } from "@/src/services/comments";
 import { deleteFavorite, postFavorite } from "@/src/services/favorites";
 import { getToken, getUserId, isLoggedIn } from "@/src/utils/JwtUtils";
@@ -463,7 +463,7 @@ export default function Gallery() {
   const requestApods = async (date: string): Promise<Apod | null> => {
     let data = null;
     try {
-      data = await fetchApodsFromBackend(date);
+      data = await fetchApod(date);
     } catch (error) {
       translateX.value = 0;
       console.error("Error fetching data");

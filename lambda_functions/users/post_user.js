@@ -89,7 +89,7 @@ exports.handler = async (event) => {
   }
 };
 
-// Function to get SSM params and
+// Function to get SSM params and configure the database connection.
 async function configureDbConnection() {
   const input = {
     Names: [
@@ -104,19 +104,27 @@ async function configureDbConnection() {
 
   const dbParams = new GetParametersCommand(input);
 
-  const ssmClient = new SSMClient({ region: process.env.MY_REGION }); // put in env var
+  const ssmClient = new SSMClient({ region: process.env.MY_REGION });
 
   let client;
   let errorSsm;
   try {
     const data = await ssmClient.send(dbParams);
 
-    // Figure out why it comes in this order...
-    const dbHost = data.Parameters[0].Value;
-    const dbName = data.Parameters[1].Value;
-    const dbPassword = data.Parameters[2].Value;
-    const dbPort = data.Parameters[3].Value;
-    const dbUser = data.Parameters[4].Value;
+    // Initialize empty object
+    const params = {};
+
+    // Build lookup by name
+    data.Parameters.forEach((p) => {
+      params[p.Name] = p.Value;
+    });
+
+    // Get the values from the params object using the environment variable names
+    const dbHost = params[process.env.SSM_DB_HOST];
+    const dbName = params[process.env.SSM_DB_NAME];
+    const dbPassword = params[process.env.SSM_DB_PASSWORD];
+    const dbPort = params[process.env.SSM_DB_PORT];
+    const dbUser = params[process.env.SSM_DB_USER];
 
     // Create client connection to RDS.
     client = new Client({
@@ -127,7 +135,10 @@ async function configureDbConnection() {
       password: dbPassword,
     });
   } catch (error) {
-    //errorSsm = error.message; // Commented out because sometimes this returns login info depending on error...
+    console.error("Error retrieving SSM parameters.", error);
+    // Originally assigned this to error but sometimes it returned login info depending on error,
+    // so I changed it to a generic error message.
+    errorSsm = "Error retrieving SSM parameters.";
   } finally {
     return [client, errorSsm];
   }

@@ -8,11 +8,15 @@ Features
         - Add display of copyright.
 
     Backend
+        - Make the configureDbConnection function a separate lambda function to call.
+            - That way every lambda function doesn't have to implement it.
         - Maybe change the created_at col in comments to a date datatype instead of timestamp.
         - Maybe clean up the lambda functions a bit.
         
     Bugs
         - There appears to be an issue with NASA's server for retrieving the APODs now. They did have a disclaimer about it before, but it worked fine then.
             - I'm working around this by storing each apod retrieved in my database and attempting to retrieve it from there first.
+            - I should make a script to run overnight to query APODs from NASA to upload to my database.
+              I can start from the first APOD release date, and incrementing from there. Maybe just query 1x per minute to avoid hitting rate limit.
         - Posting a reply to a comment seems to take too long.
         - "Loading..." text doesn't always appear in the Gallery when starting the app.
