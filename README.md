@@ -22,8 +22,8 @@ The main reason I built this application was simply to gain more exposure mobile
 - Backend:
   - **AWS**
     - **API Gateway:** used to create HTTP endpoints
-    - **Lambda:** used to proccess HTTP requests (GET, POST, DELETE)
-    - **Aurora and RDS:** used to create store the database
+    - **Lambda:** used to process HTTP requests (GET, POST, DELETE)
+    - **RDS:** used to create store the database
     - **CloudWatch:** used to view logs and debug issues
     - **Systems Manager:** used to store database login info
   - Database
